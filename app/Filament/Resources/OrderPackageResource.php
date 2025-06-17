@@ -43,15 +43,27 @@ class OrderPackageResource extends Resource
                                 'Karpet' => 'Karpet',
                                 'Lembaran' => 'Lembaran',
                             ])
-                            ->native(false),
+                            ->native(false)
+                            ->reactive(),
                         Forms\Components\TextInput::make('price')
                             ->label('Harga')
                             ->required()
                             ->integer()
-                            ->prefix('Rp.'),
+                            ->prefix('Rp.')
+                            ->disabled(fn($get) => $get('type') === null)
+                            ->postfix(function ($get) {
+                                return match ($get('type')) {
+                                    'Kiloan' => 'Per Kilo',
+                                    'Karpet' => 'Per Luas (m²)',
+                                    'Lembaran' => 'Per Lembar',
+                                    default => null,
+                                };
+                            })
+                            ->reactive(),
                     ]),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
