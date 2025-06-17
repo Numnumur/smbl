@@ -17,6 +17,8 @@ return new class extends Migration
             $table->enum('type', ['Persentase', 'Langsung']);
             $table->double('value');
             $table->double('minimum')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
             $table->foreignId('order_package_id')->constrained('order_packages')->cascadeOnDelete();
             $table->timestamps();
         });
