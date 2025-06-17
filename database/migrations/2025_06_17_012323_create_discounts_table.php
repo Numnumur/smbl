@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type');
+            $table->enum('type', ['Persentase', 'Langsung']);
             $table->double('value');
             $table->double('minimum')->nullable();
             $table->foreignId('order_package_id')->constrained('order_packages')->cascadeOnDelete();
