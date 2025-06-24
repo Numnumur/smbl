@@ -7,6 +7,7 @@ use App\Filament\Resources\CustomerResource\RelationManagers;
 use App\Helper\ResourceCustomizing;
 use App\Models\Customer;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -28,29 +29,32 @@ class CustomerResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nama')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('whatsapp')
-                    ->label('Nomor WhatsApp(WA)')
-                    ->maxLength(255)
-                    ->rules([
-                        'required',
-                        'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
-                    ])
-                    ->validationMessages([
-                        'required' => 'Nomor WhatsApp wajib diisi.',
-                        'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                    ]),
-                Forms\Components\Textarea::make('address')
-                    ->label('Alamat')
-                    ->columnSpanFull()
-                    ->maxLength(300),
-                Forms\Components\Textarea::make('note')
-                    ->label('Catatan')
-                    ->columnSpanFull()
-                    ->maxLength(300),
+                Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nama')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('whatsapp')
+                            ->label('Nomor WhatsApp(WA)')
+                            ->maxLength(255)
+                            ->rules([
+                                'required',
+                                'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
+                            ])
+                            ->validationMessages([
+                                'required' => 'Nomor WhatsApp wajib diisi.',
+                                'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                            ]),
+                        Forms\Components\Textarea::make('address')
+                            ->label('Alamat')
+                            ->columnSpanFull()
+                            ->maxLength(300),
+                        Forms\Components\Textarea::make('note')
+                            ->label('Catatan')
+                            ->columnSpanFull()
+                            ->maxLength(300),
+                    ])->columns(),
             ]);
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('order_packages', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['Kiloan', 'Karpet', 'Lembaran']);
+            $table->enum('type', ['Kiloan', 'Karpet', 'Lembaran', 'Satuan']);
             $table->double('price');
             $table->timestamps();
         });
