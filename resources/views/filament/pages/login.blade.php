@@ -5,8 +5,8 @@
             @php
                 $logoPath = null;
                 foreach (['png', 'jpg', 'jpeg', 'svg', 'webp'] as $ext) {
-                    if (file_exists(public_path("storage/img/logo.$ext"))) {
-                        $logoPath = asset("storage/img/logo.$ext");
+                    if (file_exists(public_path("storage/login-page-image/logo.$ext"))) {
+                        $logoPath = asset("storage/login-page-image/logo.$ext");
                         break;
                     }
                 }
@@ -43,8 +43,8 @@
     @php
         $bgPath = null;
         foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
-            if (file_exists(public_path("storage/img/login-bg.$ext"))) {
-                $bgPath = asset("storage/img/login-bg.$ext");
+            if (file_exists(public_path("storage/login-page-image/login-bg.$ext"))) {
+                $bgPath = asset("storage/login-page-image/login-bg.$ext");
                 break;
             }
         }
