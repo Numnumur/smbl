@@ -16,7 +16,13 @@ class Order extends Model
         'delivery_proof',
         'type',
         'price',
+
         'total_price',
+        'discount_name',
+        'discount_type',
+        'discount_value',
+        'total_price_after_discount',
+
         'length',
         'width',
         'weight',
@@ -27,10 +33,5 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function orderPackage(): BelongsTo
-    {
-        return $this->belongsTo(OrderPackage::class);
     }
 }

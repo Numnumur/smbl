@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderPackage;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -27,58 +28,84 @@ class OrderResource extends Resource
 
     protected static ?string $icon = 'heroicon-o-shopping-bag';
 
+    protected static ?string $group = 'Transaksi';
+
     public static function form(Form $form): Form
     {
         $recalculateTotalPrice = function ($state, callable $get, callable $set) {
             $type = $get('type');
             $price = (float) $get('price');
-            $total = 0;
+            $status = $get('status');
+
+            $totalBeforeDiscount = 0;
 
             if ($type === 'Kiloan') {
-                $total = $get('weight') * $price;
+                $totalBeforeDiscount = $get('weight') * $price;
             } elseif ($type === 'Karpet') {
                 $length = $get('length');
                 $width = $get('width');
                 $area = ($length / 100) * ($width / 100);
-                $total = $area * $price;
+                $totalBeforeDiscount = $area * $price;
             } elseif (in_array($type, ['Satuan', 'Lembaran'])) {
-                $total = $get('quantity') * $price;
+                $totalBeforeDiscount = $get('quantity') * $price;
             }
 
-            $orderPackage = \App\Models\OrderPackage::where('name', $get('order_package'))->first();
-            if ($orderPackage) {
-                $today = now()->toDateString();
-                $discount = \App\Models\Discount::where('order_package_id', $orderPackage->id)
-                    ->where('start_date', '<=', $today)
-                    ->where('end_date', '>=', $today)
-                    ->first();
+            if ($status == 'Baru') {
+                $orderPackage = \App\Models\OrderPackage::where('name', $get('order_package'))->first();
+                if ($orderPackage) {
+                    $today = now()->toDateString();
+                    $discount = \App\Models\Discount::where('order_package_id', $orderPackage->id)
+                        ->where('start_date', '<=', $today)
+                        ->where('end_date', '>=', $today)
+                        ->first();
 
-                if ($discount) {
-                    if ($discount->type === 'Persentase') {
-                        if ($discount->minimum === null || $total >= $discount->minimum) {
-                            $total -= ($total * $discount->value / 100);
-                        }
-                    } elseif ($discount->type === 'Langsung') {
-                        if ($discount->minimum === null || $total >= $discount->minimum) {
-                            $total -= $discount->value;
-                        }
+                    if ($discount) {
+                        $set('discount_name', $discount->name);
+                        $set('discount_type', $discount->type);
+                        $set('discount_value', $discount->value);
+                    } else {
+                        $set('discount_name', null);
+                        $set('discount_type', null);
+                        $set('discount_value', null);
                     }
+                }
+
+                return;
+            }
+
+            if ($status !== 'Selesai Diproses') {
+                return;
+            }
+
+            $discountType = $get('discount_type');
+            $discountValue = (float) $get('discount_value');
+
+            $totalAfterDiscount = $totalBeforeDiscount;
+
+            if ($discountType && $discountValue) {
+                if ($discountType === 'Persentase') {
+                    $totalAfterDiscount -= ($totalBeforeDiscount * $discountValue / 100);
+                } elseif ($discountType === 'Langsung') {
+                    $totalAfterDiscount -= $discountValue;
                 }
             }
 
-            $set('total_price', max(round($total), 0));
+            $set('total_price', max(round($totalBeforeDiscount), 0));
+            $set('total_price_after_discount', max(round($totalAfterDiscount), 0));
         };
+
+
 
         return $form
             ->schema([
                 Section::make()
                     ->schema([
-                        Forms\Components\DatePicker::make('entry_date')
+                        Forms\Components\DateTimePicker::make('entry_date')
                             ->label('Tanggal Pesanan Masuk')
                             ->required()
                             ->default(now())
                             ->native(false),
-                        Forms\Components\DatePicker::make('exit_date')
+                        Forms\Components\DateTimePicker::make('exit_date')
                             ->label('Tanggal Pesanan Selesai')
                             ->native(false)
                             ->disabled(fn(callable $get) => in_array($get('status'), ['Baru', 'Selesai Diproses']))
@@ -187,19 +214,70 @@ class OrderResource extends Resource
                             ->numeric()
                             ->prefix('Rp. ')
                             ->disabled()
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->visible(fn(callable $get) => $get('status') !== 'Baru'),
+
+                        Forms\Components\TextInput::make('discount_name')
+                            ->label('Nama Diskon')
+                            ->disabled()
+                            ->dehydrated(true),
+                        Forms\Components\Select::make('discount_type')
+                            ->label('Tipe Diskon')
+                            ->options([
+                                'Persentase' => 'Persentase',
+                                'Langsung' => 'Langsung',
+                            ])
+                            ->native(false)
+                            ->reactive()
+                            ->disabled()
+                            ->dehydrated(true),
+                        Forms\Components\TextInput::make('discount_value')
+                            ->label('Jumlah Diskon')
+                            ->numeric()
+                            ->prefix(fn($get) => $get('discount_type') === 'Langsung' ? 'Rp. ' : null)
+                            ->postfix(fn($get) => $get('discount_type') === 'Persentase' ? '%' : null)
+                            ->disabled()
+                            ->dehydrated(true),
+                        Forms\Components\TextInput::make('total_price_after_discount')
+                            ->label('Total Harga Setelah Diskon')
+                            ->numeric()
+                            ->prefix('Rp. ')
+                            ->disabled()
                             ->dehydrated(true)
                             ->visible(fn(callable $get) => $get('status') !== 'Baru'),
                     ])->columns(),
 
                 Section::make()
+                    ->visible(fn(callable $get) => $get('status') === 'Selesai')
                     ->schema([
-                        Forms\Components\Textarea::make('retrieval_proof')
+                        FileUpload::make('retrieval_proof')
                             ->label('Bukti Pengambilan')
-                            ->visible(fn(callable $get) => $get('status') === 'Selesai')
+                            ->openable()
+                            ->maxSize(2048)
+                            ->visibility('public')
+                            ->disk('public')
+                            ->directory('proof/retrieval')
+                            ->imageResizeMode('contain')
+                            ->removeUploadedFileButtonPosition('center bottom')
+                            ->uploadButtonPosition('center bottom')
+                            ->uploadProgressIndicatorPosition('center bottom')
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/svg', 'image/webp'])
+                            ->extraAttributes(['class' => 'w-48 h-auto'])
                             ->disabled(false),
-                        Forms\Components\Textarea::make('delivery_proof')
+                        FileUpload::make('delivery_proof')
                             ->label('Bukti Pengantaran')
-                            ->visible(fn(callable $get) => $get('status') === 'Selesai')
+                            ->openable()
+                            ->maxSize(2048)
+                            ->visibility('public')
+                            ->disk('public')
+                            ->directory('proof/delivery')
+                            ->imageResizeMode('contain')
+                            ->removeUploadedFileButtonPosition('center bottom')
+                            ->uploadButtonPosition('center bottom')
+                            ->uploadProgressIndicatorPosition('center bottom')
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/svg', 'image/webp'])
+                            ->extraAttributes(['class' => 'w-48 h-auto'])
                             ->disabled(false),
                     ])->columns(),
             ]);
@@ -215,12 +293,20 @@ class OrderResource extends Resource
                     ->label('Pelanggan')
                     ->numeric()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Baru' => 'info',
+                        'Selesai Diproses' => 'warning',
+                        'Selesai' => 'success',
+                    }),
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Pesanan Masuk')
-                    ->date('d F Y'),
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y H:i:s')),
                 Tables\Columns\TextColumn::make('exit_date')
                     ->label('Tanggal Pesanan Selesai')
-                    ->date('d F Y'),
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y H:i:s')),
                 Tables\Columns\TextColumn::make('order_package')
                     ->label('Paket Pesanan')
                     ->searchable(),

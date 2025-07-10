@@ -26,6 +26,8 @@ class ExpenseResource extends Resource
 
     protected static ?string $icon = 'heroicon-o-banknotes';
 
+    protected static ?string $group = 'Transaksi';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -66,7 +68,7 @@ class ExpenseResource extends Resource
                             ->maxSize(2048)
                             ->visibility('public')
                             ->disk('public')
-                            ->directory('proof')
+                            ->directory('proof/expense')
                             ->imageResizeMode('contain')
                             ->removeUploadedFileButtonPosition('center bottom')
                             ->uploadButtonPosition('center bottom')
@@ -84,8 +86,8 @@ class ExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('needs')
                     ->label('Keperluan'),
                 Tables\Columns\TextColumn::make('date')
-                    ->date()
-                    ->label('Tanggal'),
+                    ->label('Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y')),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
                     ->money('Rp. '),

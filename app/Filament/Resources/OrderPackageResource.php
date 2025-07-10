@@ -25,6 +25,8 @@ class OrderPackageResource extends Resource
 
     protected static ?string $icon = 'heroicon-o-archive-box';
 
+    protected static ?string $group = 'Manajemen Data';
+
     public static function form(Form $form): Form
     {
         return $form
