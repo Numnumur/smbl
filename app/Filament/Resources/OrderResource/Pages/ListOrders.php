@@ -5,6 +5,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource;
 use App\Helper\RedirectToListPage;
 use Filament\Actions;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 
 class ListOrders extends ListRecords
@@ -15,6 +16,24 @@ class ListOrders extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'Belum Selesai' => Tab::make()
+                ->modifyQueryUsing(
+                    fn($query) => $query->where('status', '!=', 'Selesai')
+                ),
+
+            'Selesai' => Tab::make()
+                ->modifyQueryUsing(
+                    fn($query) =>
+                    $query->where(
+                        fn($query) => $query->where('status', 'Selesai')
+                    )
+                ),
         ];
     }
 }

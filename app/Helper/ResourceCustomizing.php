@@ -23,4 +23,9 @@ trait ResourceCustomizing
     {
         return static::$title;
     }
+
+    public static function getNavigationGroup(): string
+    {
+        return static::$group;
+    }
 }

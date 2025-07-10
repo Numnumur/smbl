@@ -13,13 +13,19 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->date('entry_date');
-            $table->date('exit_date')->nullable();
+            $table->datetime('entry_date');
+            $table->datetime('exit_date')->nullable();
             $table->enum('status', ['Baru', 'Selesai Diproses', 'Selesai']);
             $table->string('order_package');
             $table->string('type');
             $table->double('price');
+
             $table->double('total_price')->nullable();
+            $table->string('discount_name')->nullable();
+            $table->enum('discount_type', ['Persentase', 'Langsung'])->nullable();
+            $table->double('discount_value')->nullable();
+            $table->double('total_price_after_discount')->nullable();
+
             $table->double('length')->nullable();
             $table->double('width')->nullable();
             $table->double('weight')->nullable();

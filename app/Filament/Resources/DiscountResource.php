@@ -26,6 +26,8 @@ class DiscountResource extends Resource
 
     protected static ?string $icon = 'heroicon-o-receipt-percent';
 
+    protected static ?string $group = 'Manajemen Data';
+
     public static function form(Form $form): Form
     {
         return $form
