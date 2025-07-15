@@ -63,14 +63,6 @@ class DiscountResource extends Resource
                             ->prefix(fn($get) => $get('type') === 'Langsung' ? 'Rp.' : null)
                             ->postfix(fn($get) => $get('type') === 'Persentase' ? '%' : null)
                             ->reactive(),
-                        Forms\Components\TextInput::make('minimum')
-                            ->label('Minimal Harga Pesanan')
-                            ->numeric()
-                            ->disabled(fn($get) => $get('type') === null)
-                            ->prefix('Rp.')
-                            ->default(null)
-                            ->reactive()
-                            ->helperText('Boleh dikosongkan jika tidak ada minimal harga pesanan.'),
                         Section::make()
                             ->description('Masa berlaku diskon')
                             ->schema([
@@ -126,9 +118,6 @@ class DiscountResource extends Resource
 
                         return $state;
                     }),
-                Tables\Columns\TextColumn::make('minimum')
-                    ->label('Minimal Harga Pesanan')
-                    ->money('IDR'),
                 Tables\Columns\TextColumn::make('orderPackage.name')
                     ->label('Paket Pesanan'),
                 Tables\Columns\TextColumn::make('created_at')

@@ -90,8 +90,12 @@ class OrderResource extends Resource
                 }
             }
 
-            $set('total_price', max(round($totalBeforeDiscount), 0));
-            $set('total_price_after_discount', max(round($totalAfterDiscount), 0));
+            if ($discountType && $discountValue) {
+                $set('total_price_before_discount', max(round($totalBeforeDiscount), 0));
+                $set('total_price', max(round($totalAfterDiscount), 0));
+            } else {
+                $set('total_price', max(round($totalBeforeDiscount), 0));
+            }
         };
 
 
@@ -135,7 +139,7 @@ class OrderResource extends Resource
 
                                 $recalculateTotalPrice($state, $get, $set);
                             })
-                            ->debounce(800),
+                            ->debounce(1200),
                         Forms\Components\Select::make('status')
                             ->label('Status Pesanan')
                             ->required()
@@ -150,7 +154,7 @@ class OrderResource extends Resource
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $set('exit_date', $state === 'Selesai' ? now() : null);
                             })
-                            ->debounce(800),
+                            ->debounce(1200),
                     ])->columns(),
 
                 Section::make()
@@ -178,7 +182,7 @@ class OrderResource extends Resource
                             ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
-                            ->debounce(800),
+                            ->debounce(1500),
                         Forms\Components\TextInput::make('width')
                             ->label('Lebar')
                             ->numeric()
@@ -188,7 +192,7 @@ class OrderResource extends Resource
                             ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
-                            ->debounce(800),
+                            ->debounce(1500),
                         Forms\Components\TextInput::make('weight')
                             ->label('Berat')
                             ->numeric()
@@ -198,7 +202,7 @@ class OrderResource extends Resource
                             ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Kiloan')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
-                            ->debounce(800),
+                            ->debounce(1200),
                         Forms\Components\TextInput::make('quantity')
                             ->label('Jumlah')
                             ->numeric()
@@ -208,16 +212,14 @@ class OrderResource extends Resource
                             ->visible(fn($get) => $get('status') !== 'Baru' && in_array($get('type'), ['Lembaran', 'Satuan']))
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
-                            ->debounce(800),
-                        Forms\Components\TextInput::make('total_price')
-                            ->label('Total Harga')
+                            ->debounce(1200),
+                        Forms\Components\TextInput::make('total_price_before_discount')
+                            ->label('Total Harga Sebelum Diskon')
                             ->numeric()
                             ->prefix('Rp. ')
                             ->disabled()
-                            ->disabled()
                             ->dehydrated(true)
                             ->visible(fn(callable $get) => $get('status') !== 'Baru'),
-
                         Forms\Components\TextInput::make('discount_name')
                             ->label('Nama Diskon')
                             ->disabled()
@@ -239,10 +241,11 @@ class OrderResource extends Resource
                             ->postfix(fn($get) => $get('discount_type') === 'Persentase' ? '%' : null)
                             ->disabled()
                             ->dehydrated(true),
-                        Forms\Components\TextInput::make('total_price_after_discount')
-                            ->label('Total Harga Setelah Diskon')
+                        Forms\Components\TextInput::make('total_price')
+                            ->label('Total Harga')
                             ->numeric()
                             ->prefix('Rp. ')
+                            ->disabled()
                             ->disabled()
                             ->dehydrated(true)
                             ->visible(fn(callable $get) => $get('status') !== 'Baru'),

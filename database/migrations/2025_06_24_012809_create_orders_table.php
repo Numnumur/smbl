@@ -20,11 +20,11 @@ return new class extends Migration
             $table->string('type');
             $table->double('price');
 
-            $table->double('total_price')->nullable();
             $table->string('discount_name')->nullable();
             $table->enum('discount_type', ['Persentase', 'Langsung'])->nullable();
             $table->double('discount_value')->nullable();
-            $table->double('total_price_after_discount')->nullable();
+            $table->double('total_price_before_discount')->nullable();
+            $table->double('total_price')->nullable();
 
             $table->double('length')->nullable();
             $table->double('width')->nullable();

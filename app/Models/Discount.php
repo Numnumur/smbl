@@ -11,7 +11,6 @@ class Discount extends Model
         'name',
         'type',
         'value',
-        'minimum',
         'start_date',
         'end_date',
         'order_package_id',
