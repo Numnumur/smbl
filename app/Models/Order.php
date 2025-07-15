@@ -12,8 +12,6 @@ class Order extends Model
         'exit_date',
         'status',
         'order_package',
-        'retrieval_proof',
-        'delivery_proof',
         'type',
         'price',
 
@@ -28,6 +26,8 @@ class Order extends Model
         'weight',
         'quantity',
         'customer_id',
+        'retrieval_proof',
+        'delivery_proof',
     ];
 
     public function customer(): BelongsTo

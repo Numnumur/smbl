@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             OrderPackageSeeder::class,
             DiscountSeeder::class,
+            OrderSeeder::class,
+            ExpenseSeeder::class,
         ]);
     }
 }

@@ -105,6 +105,7 @@ class ExpenseResource extends Resource
             ->filters([
                 //
             ])
+            ->defaultSort('date', 'desc')
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

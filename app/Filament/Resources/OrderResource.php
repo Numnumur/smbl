@@ -327,6 +327,7 @@ class OrderResource extends Resource
             ->filters([
                 //
             ])
+            ->defaultSort('entry_date', 'desc')
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
