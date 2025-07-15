@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Localization;
+use Filament\Support\Facades\FilamentColor;
+use Filament\Support\Colors\Color;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +32,11 @@ class AppServiceProvider extends ServiceProvider
             Config::set('app.timezone', $timezone);
             date_default_timezone_set($timezone);
         }
+
+        FilamentColor::register([
+            'sky' => Color::Sky,
+            'violet' => Color::Violet,
+            'slate' => Color::Slate,
+        ]);
     }
 }
