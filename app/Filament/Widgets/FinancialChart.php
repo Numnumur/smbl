@@ -57,7 +57,7 @@ class FinancialChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Pendapatan',
+                    'label' => 'Pemasukan',
                     'data' => $incomeData,
                     'backgroundColor' => '#4CAF50',
                     'borderColor' => '#388E3C',
