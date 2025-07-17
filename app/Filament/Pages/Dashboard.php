@@ -2,12 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Order;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use App\Services\Reports\FinanceIncomeReportService;
 
 class Dashboard extends BaseDashboard
 {
@@ -25,7 +27,8 @@ class Dashboard extends BaseDashboard
                     TextInput::make('name')
                         ->label('Nama')
                         ->required()
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->default('Contoh Laporan'),
                     Select::make('type')
                         ->label('Tipe')
                         ->options([
@@ -33,7 +36,8 @@ class Dashboard extends BaseDashboard
                             'keuangan pengeluaran' => 'Keuangan - Pengeluaran',
                         ])
                         ->native(false)
-                        ->required(),
+                        ->required()
+                        ->default('keuangan pemasukan'),
                     Section::make()
                         ->description('Rentang Waktu Data')
                         ->schema([
@@ -41,7 +45,8 @@ class Dashboard extends BaseDashboard
                                 ->label('Dari Tanggal')
                                 ->native(false)
                                 ->required()
-                                ->reactive(),
+                                ->reactive()
+                                ->default('2025-6-1'),
                             DatePicker::make('end_date')
                                 ->label('Hingga Tanggal')
                                 ->native(false)
@@ -51,12 +56,19 @@ class Dashboard extends BaseDashboard
                                 ->rules(['after_or_equal:start_date'])
                                 ->validationMessages([
                                     'after_or_equal' => 'Tanggal hingga tidak boleh lebih awal dari tanggal mulai.',
-                                ]),
+                                ])
+                                ->default('2025-6-30'),
                         ])->columns(),
                 ])
                 ->action(function (array $data) {
-                    // kode
-                }),
+                    if ($data['type'] === 'keuangan pemasukan') {
+                        $pdf = FinanceIncomeReportService::generate($data);
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
+                })
         ];
     }
 }
