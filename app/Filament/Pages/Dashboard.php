@@ -10,6 +10,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use App\Services\Reports\FinanceIncomeReportService;
+use App\Services\Reports\FinanceExpenseReportService;
 
 class Dashboard extends BaseDashboard
 {
@@ -63,7 +64,13 @@ class Dashboard extends BaseDashboard
                 ->action(function (array $data) {
                     if ($data['type'] === 'keuangan pemasukan') {
                         $pdf = FinanceIncomeReportService::generate($data);
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
 
+                    if ($data['type'] === 'keuangan pengeluaran') {
+                        $pdf = FinanceExpenseReportService::generate($data);
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf;
                         }, $data['name'] . '.pdf');

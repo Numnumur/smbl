@@ -38,7 +38,6 @@ class ExpenseResource extends Resource
                             ->required()
                             ->label('Keperluan')
                             ->columnSpanFull()
-                            ->multiple()
                             ->options([
                                 'Plastik' => 'Plastik',
                                 'Parfum' => 'Parfum',

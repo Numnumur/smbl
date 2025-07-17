@@ -17,7 +17,8 @@ class FinanceIncomeReportService
         $orders = Order::whereBetween('entry_date', [$startDate, $endDate])->get();
 
         $total = $orders->sum('total_price');
-        $days = $startDate->diffInDaysFiltered(fn(Carbon $date) => true, $endDate) + 1;
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+        $totalDays = $days;
 
         $averagePerDay = $days > 0 ? $total / $days : 0;
         $averagePerOrder = $orders->count() > 0 ? $total / $orders->count() : 0;
@@ -48,6 +49,7 @@ class FinanceIncomeReportService
             'name' => $data['name'],
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
+            'totalDays' => $totalDays,
             'total' => $total,
             'averagePerDay' => $averagePerDay,
             'averagePerOrder' => $averagePerOrder,
