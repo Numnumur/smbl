@@ -15,11 +15,11 @@ class Order extends Model
         'type',
         'price',
 
-        'total_price',
         'discount_name',
         'discount_type',
         'discount_value',
-        'total_price_after_discount',
+        'total_price_before_discount',
+        'total_price',
 
         'length',
         'width',
