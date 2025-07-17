@@ -11,6 +11,8 @@ use Illuminate\Support\Carbon;
 
 class StatsOverview2 extends BaseWidget
 {
+    protected static ?int $sort = 2;
+
     protected static ?string $pollingInterval = '20s';
 
     protected function getStats(): array

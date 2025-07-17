@@ -11,6 +11,8 @@ use Illuminate\Support\Carbon;
 
 class StatsOverview extends BaseWidget
 {
+    protected static ?int $sort = 1;
+
     protected static ?string $pollingInterval = '20s';
 
     protected function getHeading(): ?string
@@ -52,7 +54,7 @@ class StatsOverview extends BaseWidget
 
             Stat::make('populer', $popularPackageName)
                 ->label('Paket Pesanan Populer')
-                ->description("Telah dipesan sebanyak {$popularPackageCount} kali bulan ini")
+                ->description("Telah dipesan sebanyak {$popularPackageCount} kali")
                 ->descriptionIcon('heroicon-o-shopping-bag', IconPosition::Before)
                 ->color('success'),
         ];
