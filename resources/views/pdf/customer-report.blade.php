@@ -3,11 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Pelanggan</title>
+    <title>Laporan Pesanan Pelanggan</title>
     <style>
         @page {
             margin: 40px;
-            margin-top: 80px;
             /* Tambahan space untuk header di setiap halaman */
         }
 
@@ -109,7 +108,8 @@
 
 <body>
     <h1>{{ $name }}</h1>
-
+    <br>
+    <br>
     <table class="statistic-table">
         <tr>
             <td><strong>Periode</strong></td>
