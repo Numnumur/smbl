@@ -101,6 +101,16 @@
             <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
         </tr>
         <tr>
+            <td><strong>Total Pengeluaran</strong></td>
+            <td>:</td>
+            <td>Rp. {{ number_format($totalExpense, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Laba Bersih</strong></td>
+            <td>:</td>
+            <td>Rp. {{ number_format($netProfit, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
             <td><strong>Rata-rata Per Hari</strong></td>
             <td>:</td>
             <td>Rp. {{ number_format($averagePerDay, 0, ',', '.') }}</td>
@@ -118,7 +128,8 @@
         <tr>
             <td><strong>Hari Terendah</strong></td>
             <td>:</td>
-            <td>{{ $bottomDay ? $bottomDay . ' (Rp. ' . number_format($bottomDayAmount, 0, ',', '.') . ')' : '-' }}</td>
+            <td>{{ $bottomDay ? $bottomDay . ' (Rp. ' . number_format($bottomDayAmount, 0, ',', '.') . ')' : '-' }}
+            </td>
         </tr>
     </table>
 
