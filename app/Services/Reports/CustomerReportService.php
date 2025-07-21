@@ -29,7 +29,7 @@ class CustomerReportService
             return [
                 'name' => $customer->user->name ?? 'Tidak diketahui',
                 'total_orders' => $totalOrders,
-                'last_order_date' => $lastOrderDate ? $lastOrderDate->translatedFormat('d F Y') : '-',
+                'last_order_date' => $lastOrderDate ? $lastOrderDate->translatedFormat('j F Y') : '-',
                 'last_order_diff' => $lastOrderDiff,
                 'total_income' => $totalIncome,
                 'average_income' => $averageIncome,
@@ -45,8 +45,8 @@ class CustomerReportService
 
         $html = view('pdf.customer-report', [
             'name' => $name,
-            'startDate' => $startDate->translatedFormat('d F Y'),
-            'endDate' => $endDate->translatedFormat('d F Y'),
+            'startDate' => $startDate->translatedFormat('j F Y'),
+            'endDate' => $endDate->translatedFormat('j F Y'),
             'customers' => $data,
         ])->render();
 
