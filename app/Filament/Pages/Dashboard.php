@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use App\Services\Reports\FinanceIncomeReportService;
 use App\Services\Reports\FinanceExpenseReportService;
 use App\Services\Reports\CustomerReportService;
+use App\Services\Reports\OrderWorkReportService;
 use Illuminate\Support\Carbon;
 
 class Dashboard extends BaseDashboard
@@ -37,7 +38,8 @@ class Dashboard extends BaseDashboard
                         ->options([
                             'keuangan pemasukan' => 'Keuangan - Pemasukan',
                             'keuangan pengeluaran' => 'Keuangan - Pengeluaran',
-                            'pelanggan' => 'Pelanggan',
+                            'pesanan pelanggan' => 'Pesanan Pelanggan',
+                            'pengerjaan pesanan' => 'Pengerjaan Pesanan',
                         ])
                         ->native(false)
                         ->required()
@@ -79,8 +81,20 @@ class Dashboard extends BaseDashboard
                         }, $data['name'] . '.pdf');
                     }
 
-                    if ($data['type'] === 'pelanggan') {
+                    if ($data['type'] === 'pesanan pelanggan') {
                         $pdf = CustomerReportService::generatePdf(
+                            $data['name'],
+                            Carbon::parse($data['start_date']),
+                            Carbon::parse($data['end_date']),
+                        );
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
+
+                    if ($data['type'] === 'pengerjaan pesanan') {
+                        $pdf = OrderWorkReportService::generatePdf(
                             $data['name'],
                             Carbon::parse($data['start_date']),
                             Carbon::parse($data['end_date']),

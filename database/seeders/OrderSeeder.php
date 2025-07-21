@@ -151,7 +151,7 @@ class OrderSeeder extends Seeder
                 'exit_date' => '2025-6-10',
                 'status' => 'Selesai',
                 'order_package' => 'Bedcover Besar',
-                'type' => 'Kiloan',
+                'type' => 'Lembaran',
                 'price' => 35000,
                 'quantity' => 1,
                 'total_price' => 35000,
