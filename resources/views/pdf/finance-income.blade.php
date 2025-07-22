@@ -137,7 +137,7 @@
 
 
     <div class="section">
-        <h2>List Pemasukan Berdasarkan Paket Pesanan</h2>
+        <h2>Pemasukan Berdasarkan Paket Pesanan</h2>
         <table>
             <thead>
                 <tr>
@@ -165,7 +165,7 @@
     </div>
 
     <div class="section">
-        <h2>List Pemasukan Berdasarkan Tipe Pada Paket Pesanan</h2>
+        <h2>Pemasukan Berdasarkan Tipe Pada Paket Pesanan</h2>
         <table>
             <thead>
                 <tr>

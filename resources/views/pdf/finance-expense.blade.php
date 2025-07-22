@@ -103,7 +103,7 @@
     </table>
 
     <div class="section">
-        <h2>List Pengeluaran Berdasarkan Kebutuhan</h2>
+        <h2>Pengeluaran Berdasarkan Kebutuhan</h2>
         <table>
             <thead>
                 <tr>

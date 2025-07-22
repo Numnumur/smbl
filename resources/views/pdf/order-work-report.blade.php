@@ -126,7 +126,7 @@
     </div>
 
     <div class="section">
-        <h2>Pengerjaan Berdasarkan Tipe Paket</h2>
+        <h2>Pengerjaan Berdasarkan Tipe Pada Paket Pesanan</h2>
         <table>
             <thead>
                 <tr>
