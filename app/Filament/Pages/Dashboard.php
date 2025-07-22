@@ -13,6 +13,7 @@ use App\Services\Reports\FinanceIncomeReportService;
 use App\Services\Reports\FinanceExpenseReportService;
 use App\Services\Reports\CustomerReportService;
 use App\Services\Reports\OrderWorkReportService;
+use App\Services\Reports\DiscountReportService;
 use Illuminate\Support\Carbon;
 
 class Dashboard extends BaseDashboard
@@ -40,6 +41,7 @@ class Dashboard extends BaseDashboard
                             'keuangan pengeluaran' => 'Keuangan - Pengeluaran',
                             'pesanan pelanggan' => 'Pesanan Pelanggan',
                             'pengerjaan pesanan' => 'Pengerjaan Pesanan',
+                            'pemberian diskon' => 'Pemberian Diskon',
                         ])
                         ->native(false)
                         ->required()
@@ -52,7 +54,7 @@ class Dashboard extends BaseDashboard
                                 ->native(false)
                                 ->required()
                                 ->reactive()
-                                ->default('2025-6-1'),
+                                ->default('2025-7-1'),
                             DatePicker::make('end_date')
                                 ->label('Hingga Tanggal')
                                 ->native(false)
@@ -63,7 +65,7 @@ class Dashboard extends BaseDashboard
                                 ->validationMessages([
                                     'after_or_equal' => 'Tanggal hingga tidak boleh lebih awal dari tanggal mulai.',
                                 ])
-                                ->default('2025-6-30'),
+                                ->default('2025-7-31'),
                         ])->columns(),
                 ])
                 ->action(function (array $data) {
@@ -95,6 +97,18 @@ class Dashboard extends BaseDashboard
 
                     if ($data['type'] === 'pengerjaan pesanan') {
                         $pdf = OrderWorkReportService::generatePdf(
+                            $data['name'],
+                            Carbon::parse($data['start_date']),
+                            Carbon::parse($data['end_date']),
+                        );
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
+
+                    if ($data['type'] === 'pemberian diskon') {
+                        $pdf = DiscountReportService::generatePdf(
                             $data['name'],
                             Carbon::parse($data['start_date']),
                             Carbon::parse($data['end_date']),
