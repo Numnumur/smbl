@@ -102,7 +102,6 @@
     </table>
 
     <div class="section">
-        <h2>Daftar Pelanggan Tetap</h2>
         <table>
             <thead>
                 <tr>
