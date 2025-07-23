@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use App\Services\Reports\FinanceIncomeReportService;
 use App\Services\Reports\FinanceExpenseReportService;
+use App\Services\Reports\RegularCustomerReportService;
 use App\Services\Reports\CustomerReportService;
 use App\Services\Reports\OrderWorkReportService;
 use App\Services\Reports\DiscountReportService;
@@ -39,13 +40,23 @@ class Dashboard extends BaseDashboard
                         ->options([
                             'keuangan pemasukan' => 'Keuangan - Pemasukan',
                             'keuangan pengeluaran' => 'Keuangan - Pengeluaran',
+                            'pelanggan tetap' => 'Pelanggan Tetap',
                             'pesanan pelanggan' => 'Pesanan Pelanggan',
                             'pengerjaan pesanan' => 'Pengerjaan Pesanan',
                             'pemberian diskon' => 'Pemberian Diskon',
                         ])
+                        ->reactive()
                         ->native(false)
                         ->required()
                         ->default('keuangan pemasukan'),
+                    TextInput::make('kriteria_minimum_pesanan')
+                        ->label('Kriteria Minimum Pesanan')
+                        ->numeric()
+                        ->minValue(1)
+                        ->visible(fn($get) => $get('type') === 'pelanggan tetap')
+                        ->required(fn($get) => $get('type') === 'pelanggan tetap')
+                        ->reactive()
+                        ->columnSpanFull(),
                     Section::make()
                         ->description('Rentang Waktu Data')
                         ->schema([
@@ -78,6 +89,14 @@ class Dashboard extends BaseDashboard
 
                     if ($data['type'] === 'keuangan pengeluaran') {
                         $pdf = FinanceExpenseReportService::generate($data);
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
+
+                    if ($data['type'] === 'pelanggan tetap') {
+                        $pdf = RegularCustomerReportService::generate($data);
+
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf;
                         }, $data['name'] . '.pdf');

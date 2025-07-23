@@ -1905,7 +1905,7 @@ class OrderSeeder extends Seeder
                 'exit_date' => null,
                 'status' => 'Selesai Diproses',
                 'order_package' => 'Seprai',
-                'type' => 'Kiloan',
+                'type' => 'Lembaran',
                 'price' => 10000,
                 'quantity' => 1,
                 'total_price' => 10000,
