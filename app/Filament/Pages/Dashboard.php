@@ -15,6 +15,7 @@ use App\Services\Reports\RegularCustomerReportService;
 use App\Services\Reports\CustomerReportService;
 use App\Services\Reports\OrderWorkReportService;
 use App\Services\Reports\DiscountReportService;
+use App\Services\Reports\CustomerOrderEntryExitReportService;
 use Illuminate\Support\Carbon;
 
 class Dashboard extends BaseDashboard
@@ -44,6 +45,7 @@ class Dashboard extends BaseDashboard
                             'pesanan pelanggan' => 'Pesanan Pelanggan',
                             'pengerjaan pesanan' => 'Pengerjaan Pesanan',
                             'pemberian diskon' => 'Pemberian Diskon',
+                            'detail keluar masuk' => 'Keluar Masuk Pesanan',
                         ])
                         ->reactive()
                         ->native(false)
@@ -128,6 +130,18 @@ class Dashboard extends BaseDashboard
 
                     if ($data['type'] === 'pemberian diskon') {
                         $pdf = DiscountReportService::generatePdf(
+                            $data['name'],
+                            Carbon::parse($data['start_date']),
+                            Carbon::parse($data['end_date']),
+                        );
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['name'] . '.pdf');
+                    }
+
+                    if ($data['type'] === 'detail keluar masuk') {
+                        $pdf = CustomerOrderEntryExitReportService::generatePdf(
                             $data['name'],
                             Carbon::parse($data['start_date']),
                             Carbon::parse($data['end_date']),
