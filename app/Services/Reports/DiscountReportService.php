@@ -10,6 +10,9 @@ class DiscountReportService
 {
     public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate)
     {
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+        $totalDays = $days;
+
         $orders = Order::query()
             ->whereNotNull('discount_name')
             ->where('status', 'Selesai')
@@ -64,12 +67,11 @@ class DiscountReportService
             ];
         })->values();
 
-
-        // Render ke view
         $html = view('pdf.discount-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
+            'totalDays' => $totalDays,
             'totalUsage' => $totalUsage,
             'totalDiscount' => $totalDiscount,
             'byDiscount' => $byDiscount,

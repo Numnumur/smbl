@@ -84,7 +84,7 @@
         <tr>
             <td><strong>Periode</strong></td>
             <td>:</td>
-            <td>{{ $startDate }} - {{ $endDate }}</td>
+            <td>{{ $startDate }} - {{ $endDate }} ({{ $totalDays }} hari)</td>
         </tr>
         <tr>
             <td><strong>Total Penggunaan Diskon</strong></td>

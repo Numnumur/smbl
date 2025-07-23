@@ -41,12 +41,15 @@ class CustomerReportService
 
     public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate)
     {
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+        $totalDays = $days;
         $data = self::generate($startDate, $endDate);
 
         $html = view('pdf.customer-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
+            'totalDays' => $totalDays,
             'customers' => $data,
         ])->render();
 
