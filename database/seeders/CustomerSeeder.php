@@ -15,85 +15,85 @@ class CustomerSeeder extends Seeder
     {
         $customers = [
             // ----------- 1
-            ['name' => 'Fadil', 'whatsapp' => null],
+            ['user_id' => 1],
 
             // ----------- 2
-            ['name' => 'Jamal', 'whatsapp' => null],
+            ['user_id' => 2],
 
             // ----------- 3
-            ['name' => 'Daniel', 'whatsapp' => null],
+            ['user_id' => 3],
 
             // ----------- 4
-            ['name' => 'Bu Ema', 'whatsapp' => null],
+            ['user_id' => 4],
 
             // ----------- 5
-            ['name' => 'Ambar', 'whatsapp' => null],
+            ['user_id' => 5],
 
             // ----------- 6
-            ['name' => 'Sella', 'whatsapp' => null],
+            ['user_id' => 6],
 
             // ----------- 7
-            ['name' => 'Asri', 'whatsapp' => null],
+            ['user_id' => 7],
 
             // ----------- 8
-            ['name' => 'Samuel', 'whatsapp' => null],
+            ['user_id' => 8],
 
             // ----------- 9
-            ['name' => 'Putri', 'whatsapp' => null],
+            ['user_id' => 9],
 
             // ----------- 10
-            ['name' => 'Ari', 'whatsapp' => null],
+            ['user_id' => 10],
 
             // ----------- 11
-            ['name' => 'Hendri', 'whatsapp' => null],
+            ['user_id' => 11],
 
             // ----------- 12
-            ['name' => 'Johan', 'whatsapp' => null],
+            ['user_id' => 12],
 
             // ----------- 13
-            ['name' => 'MH', 'whatsapp' => null],
+            ['user_id' => 13],
 
             // ----------- 14
-            ['name' => 'Eka', 'whatsapp' => null],
+            ['user_id' => 14],
 
             // ----------- 15
-            ['name' => 'Hera', 'whatsapp' => null],
+            ['user_id' => 15],
 
             // ----------- 16
-            ['name' => 'Pak Slamet', 'whatsapp' => null],
+            ['user_id' => 16],
 
             // ----------- 17
-            ['name' => 'Pak Wilman', 'whatsapp' => null],
+            ['user_id' => 17],
 
             // ----------- 18
-            ['name' => 'Fatih', 'whatsapp' => null],
+            ['user_id' => 18],
 
             // ----------- 19
-            ['name' => 'Deswita', 'whatsapp' => null],
+            ['user_id' => 19],
 
             // ----------- 20
-            ['name' => 'Mama Fajar', 'whatsapp' => null],
+            ['user_id' => 20],
 
             // ----------- 21
-            ['name' => 'Pak Eko', 'whatsapp' => null],
+            ['user_id' => 21],
 
             // ----------- 22
-            ['name' => 'Dio', 'whatsapp' => null],
+            ['user_id' => 22],
 
             // ----------- 23
-            ['name' => 'Mama Syifa', 'whatsapp' => null],
+            ['user_id' => 23],
 
             // ----------- 24
-            ['name' => 'Mama Tri', 'whatsapp' => null],
+            ['user_id' => 24],
 
             // ----------- 25
-            ['name' => 'Yan/Dwi', 'whatsapp' => null],
+            ['user_id' => 25],
 
             // ----------- 26
-            ['name' => 'Eben', 'whatsapp' => null],
+            ['user_id' => 26],
 
             // ----------- 27
-            ['name' => 'Bu Jevin', 'whatsapp' => null],
+            ['user_id' => 27],
         ];
 
         foreach ($customers as $c) {
