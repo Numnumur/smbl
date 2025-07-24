@@ -13,8 +13,13 @@ class OrderPackage extends Model
         'price',
     ];
 
-    public function order(): HasMany
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function discounts()
+    {
+        return $this->hasMany(Discount::class, 'order_package_id');
     }
 }
