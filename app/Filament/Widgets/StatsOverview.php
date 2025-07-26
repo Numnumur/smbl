@@ -6,18 +6,20 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Order;
-use App\Models\Expense;
 use Illuminate\Support\Carbon;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class StatsOverview extends BaseWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 1;
 
     protected static ?string $pollingInterval = '20s';
 
     protected function getHeading(): ?string
     {
-        return 'Statistik Bulan Ini';
+        return 'Statistik Pesanan Bulan Ini';
     }
 
     protected function getStats(): array

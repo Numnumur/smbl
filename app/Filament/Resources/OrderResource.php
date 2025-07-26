@@ -108,12 +108,14 @@ class OrderResource extends Resource
                             ->label('Tanggal Pesanan Masuk')
                             ->required()
                             ->default(now())
-                            ->native(false),
+                            ->native(false)
+                            ->seconds(false),
                         Forms\Components\DateTimePicker::make('exit_date')
                             ->label('Tanggal Pesanan Selesai')
                             ->native(false)
                             ->disabled(fn(callable $get) => in_array($get('status'), ['Baru', 'Selesai Diproses']))
-                            ->required(fn(callable $get) => $get('status') === 'Selesai'),
+                            ->required(fn(callable $get) => $get('status') === 'Selesai')
+                            ->seconds(false),
                         Forms\Components\Select::make('customer_id')
                             ->label('Pelanggan')
                             ->options(Customer::all()->pluck('name', 'id'))

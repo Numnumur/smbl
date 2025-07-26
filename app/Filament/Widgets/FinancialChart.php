@@ -6,10 +6,12 @@ use App\Models\Order;
 use App\Models\Expense;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Carbon;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class FinancialChart extends ChartWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 3;
 
     protected static ?string $pollingInterval = '20s';

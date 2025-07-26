@@ -8,27 +8,21 @@ use Filament\Actions\Action;
 use Livewire\Attributes\Locked;
 use function Filament\authorize;
 use App\Filament\Clusters\Settings;
-use App\Helper\PageTranslate;
-use Illuminate\Support\Facades\App;
 use Filament\Forms\Components\Select;
 use Filament\Support\Exceptions\Halt;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Contracts\HasForms;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\Component;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Illuminate\Contracts\Support\Htmlable;
-use App\Services\LocalizationSettingsService;
 use Filament\Forms\Concerns\InteractsWithForms;
-
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Models\Localization as LocalizationModel;
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class Localization extends Page implements HasForms
 {
-    use InteractsWithForms;
+    use InteractsWithForms, HasPageShield;
 
     public ?array $data = [];
 

@@ -8,12 +8,20 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Order;
 use App\Models\Expense;
 use Illuminate\Support\Carbon;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class StatsOverview2 extends BaseWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 2;
 
     protected static ?string $pollingInterval = '20s';
+
+    protected function getHeading(): ?string
+    {
+        return 'Statistik Keuangan Bulan Ini';
+    }
 
     protected function getStats(): array
     {
