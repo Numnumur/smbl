@@ -30,6 +30,11 @@ class OrderResource extends Resource
 
     protected static ?string $group = 'Transaksi';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
+    }
+
     public static function form(Form $form): Form
     {
         $recalculateTotalPrice = function ($state, callable $get, callable $set) {
@@ -308,10 +313,10 @@ class OrderResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Pesanan Masuk')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y H:i:s')),
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
                 Tables\Columns\TextColumn::make('exit_date')
                     ->label('Tanggal Pesanan Selesai')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y H:i:s')),
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
                 Tables\Columns\TextColumn::make('order_package')
                     ->label('Paket Pesanan')
                     ->searchable(),

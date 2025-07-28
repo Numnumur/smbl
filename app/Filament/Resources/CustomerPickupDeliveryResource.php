@@ -23,11 +23,16 @@ class CustomerPickupDeliveryResource extends Resource
 
     protected static ?string $model = CustomerPickupDelivery::class;
 
-    protected static ?string $title = 'Antar Jemput';
+    protected static ?string $title = 'Riwayat Antar Jemput';
 
     protected static ?string $icon = 'heroicon-o-archive-box';
 
     protected static ?string $group = '';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('panel_user');
+    }
 
     public static function table(Table $table): Table
     {
@@ -35,6 +40,7 @@ class CustomerPickupDeliveryResource extends Resource
             ->query(
                 static::getEloquentQuery()
                     ->where('customer_id', auth()->user()->customer?->id ?? 0)
+                    ->orderByDesc('created_at')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('date_and_time')
