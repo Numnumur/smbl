@@ -39,6 +39,7 @@ class CustomerOrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('20s')
             ->query(
                 static::getEloquentQuery()
                     ->where('customer_id', auth()->user()->customer?->id ?? 0)
@@ -73,12 +74,10 @@ class CustomerOrderResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

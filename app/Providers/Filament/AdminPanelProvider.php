@@ -60,12 +60,6 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            // ->userMenuItems([
-            //     'profile' => MenuItem::make()
-            //         ->label(fn() => Auth::user()->name)
-            //         ->url(fn(): string => EditProfilePage::getUrl())
-            //         ->icon('heroicon-m-user-circle')
-            // ])
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->setTitle('Profil Saya')

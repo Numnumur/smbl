@@ -123,9 +123,11 @@ class OrderResource extends Resource
                             ->seconds(false),
                         Forms\Components\Select::make('customer_id')
                             ->label('Pelanggan')
-                            ->options(Customer::all()->pluck('name', 'id'))
+                            ->options(
+                                Customer::with('user')->get()
+                                    ->mapWithKeys(fn($customer) => [$customer->id => $customer->user->name ?? 'Tidak diketahui'])
+                            )
                             ->searchable()
-                            ->preload()
                             ->required(),
                         Forms\Components\Select::make('order_package')
                             ->label('Paket Pesanan')
