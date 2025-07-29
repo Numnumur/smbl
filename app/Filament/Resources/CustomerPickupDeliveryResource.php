@@ -62,9 +62,7 @@ class CustomerPickupDeliveryResource extends Resource
 
                 Tables\Columns\TextColumn::make('customer_note')
                     ->label('Catatan')
-                    ->formatStateUsing(fn($state) => $state ?: '-')
-                    ->searchable(),
-
+                    ->formatStateUsing(fn($state) => $state ?: '-'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
