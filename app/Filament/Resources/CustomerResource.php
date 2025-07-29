@@ -45,22 +45,22 @@ class CustomerResource extends Resource
                                 Group::make()
                                     ->relationship('customer')
                                     ->schema([
-                                        Forms\Components\TextInput::make('whatsapp')
+                                        Forms\Components\TextInput::make('customer.whatsapp')
                                             ->label('Nomor WhatsApp(WA)')
                                             ->maxLength(255)
                                             ->rules([
-                                                'required',
+                                                // 'required',
                                                 'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
                                             ])
                                             ->validationMessages([
-                                                'required' => 'Nomor WhatsApp wajib diisi.',
+                                                // 'required' => 'Nomor WhatsApp wajib diisi.',
                                                 'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
                                             ]),
-                                        Forms\Components\Textarea::make('address')
+                                        Forms\Components\Textarea::make('customer.address')
                                             ->label('Alamat')
                                             ->columnSpanFull()
                                             ->maxLength(300),
-                                        Forms\Components\Textarea::make('note')
+                                        Forms\Components\Textarea::make('customer.note')
                                             ->label('Catatan')
                                             ->columnSpanFull()
                                             ->maxLength(300),
@@ -73,13 +73,14 @@ class CustomerResource extends Resource
                                         Placeholder::make('email')
                                             ->content(fn($record): string => $record->email),
                                     ]),
-                                // Section::make()
-                                //     ->schema([
-                                //         Forms\Components\Select::make('roles')
-                                //             ->relationship('roles', 'name')
-                                //             ->preload()
-                                //             ->searchable(),
-                                //     ]),
+                                Section::make()
+                                    ->schema([
+                                        Forms\Components\Select::make('roles')
+                                            ->relationship('roles', 'name')
+                                            ->native(false)
+                                            ->label('Peran')
+                                            ->required(),
+                                    ]),
                             ])->columnSpan(['lg' => 1]),
                     ])->columns(3)
             ])->columns(1);
@@ -88,26 +89,30 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(User::where('name', '!=', 'Admin'))
+            ->query(
+                User::whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'super_admin');
+                })
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('whatsapp')
+                Tables\Columns\TextColumn::make('customer.whatsapp')
                     ->label('Nomor WhatsApp(WA)')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address')
+                Tables\Columns\TextColumn::make('customer.address')
                     ->label('Alamat')
                     ->wrap(),
-                Tables\Columns\TextColumn::make('note')
+                Tables\Columns\TextColumn::make('customer.note')
                     ->label('Catatan')
                     ->wrap(),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('customer.created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                Tables\Columns\TextColumn::make('customer.updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
                     ->sortable()
@@ -149,11 +154,11 @@ class CustomerResource extends Resource
                         ->label('Nomor WhatsApp(WA)')
                         ->maxLength(255)
                         ->rules([
-                            'required',
+                            // 'required',
                             'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
                         ])
                         ->validationMessages([
-                            'required' => 'Nomor WhatsApp wajib diisi.',
+                            // 'required' => 'Nomor WhatsApp wajib diisi.',
                             'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
                         ]),
                     Forms\Components\Textarea::make('address')
@@ -175,11 +180,10 @@ class CustomerResource extends Resource
                 ->label('Name')
                 ->required()
                 ->maxLength(255),
-            // Forms\Components\Select::make('roles')
-            //     ->relationship('roles', 'name')
-            //     ->preload()
-            //     ->searchable()
-            //     ->default('2'),
+            Forms\Components\Select::make('roles')
+                ->relationship('roles', 'id')
+                ->default(2)
+                ->visible(false),
             Forms\Components\TextInput::make('email')
                 ->label('Email')
                 ->unique()

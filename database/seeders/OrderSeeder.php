@@ -604,7 +604,7 @@ class OrderSeeder extends Seeder
                 'order_package' => 'Bedcover Kecil',
                 'type' => 'Lembaran',
                 'price' => 25000,
-                'weight' => 1,
+                'quantity' => 1,
                 'total_price' => 25000,
                 'customer_id' => 12,
             ],

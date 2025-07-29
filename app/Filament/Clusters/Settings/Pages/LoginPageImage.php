@@ -5,7 +5,6 @@ namespace App\Filament\Clusters\Settings\Pages;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
-use App\Helper\PageCustomizing;
 use Livewire\Attributes\Locked;
 use App\Filament\Clusters\Settings;
 use App\Models\LoginPageImage as ImageModel;
@@ -16,12 +15,14 @@ use Filament\Forms\Components\Component;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
-
+use App\Helper\PageCustomizing;
+use Filament\Forms\Concerns\InteractsWithForms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use function Filament\authorize;
 
 class LoginPageImage extends Page
 {
-    use PageCustomizing;
+    use InteractsWithForms, PageCustomizing, HasPageShield;
 
     public ?array $data = [];
 

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Login;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -20,6 +21,10 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
+use Filament\Navigation\MenuItem;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -54,6 +59,25 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            // ->userMenuItems([
+            //     'profile' => MenuItem::make()
+            //         ->label(fn() => Auth::user()->name)
+            //         ->url(fn(): string => EditProfilePage::getUrl())
+            //         ->icon('heroicon-m-user-circle')
+            // ])
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->setTitle('Profil Saya')
+                    ->setSort(10)
+                    ->shouldRegisterNavigation(false)
+                    ->shouldShowDeleteAccountForm(false)
+                    ->shouldShowBrowserSessionsForm(false)
+                    ->shouldShowAvatarForm(
+                        value: true,
+                        directory: 'profile_image',
+                    ),
+                FilamentShieldPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
