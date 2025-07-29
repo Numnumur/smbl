@@ -16,6 +16,7 @@ use App\Services\Reports\CustomerReportService;
 use App\Services\Reports\OrderWorkReportService;
 use App\Services\Reports\DiscountReportService;
 use App\Services\Reports\CustomerOrderEntryExitReportService;
+use App\Services\Reports\PickupDeliveryReportService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Carbon;
@@ -144,6 +145,7 @@ class Dashboard extends BaseDashboard
                                 'pengerjaan pesanan' => 'Pengerjaan Pesanan',
                                 'pemberian diskon' => 'Pemberian Diskon',
                                 'detail keluar masuk' => 'Keluar Masuk Pesanan',
+                                'permintaan antar jemput' => 'Permintaan Antar Jemput',
                             ])
                             ->reactive()
                             ->native(false)
@@ -188,6 +190,7 @@ class Dashboard extends BaseDashboard
                             'pengerjaan pesanan' => OrderWorkReportService::class,
                             'pemberian diskon' => DiscountReportService::class,
                             'detail keluar masuk' => CustomerOrderEntryExitReportService::class,
+                            'permintaan antar jemput' => PickupDeliveryReportService::class
                         ];
 
                         $type = $data['type'];

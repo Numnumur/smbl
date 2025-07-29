@@ -14,7 +14,7 @@ class ModelHasRoleSeeder extends Seeder
     public function run(): void
     {
         $modelRoles = [
-            ['role_id' => '1', 'model_type' => 'App\Models\User', 'model_id' => '27'],
+            ['role_id' => '1', 'model_type' => 'App\Models\User', 'model_id' => '28'],
             ['role_id' => '2', 'model_type' => 'App\Models\User', 'model_id' => '1'],
             ['role_id' => '2', 'model_type' => 'App\Models\User', 'model_id' => '2'],
             ['role_id' => '2', 'model_type' => 'App\Models\User', 'model_id' => '3'],
