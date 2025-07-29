@@ -47,18 +47,18 @@ class CustomerStatsOverview extends BaseWidget
 
         $lastPickup = $pickupDeliveries
             ->where('status', '!=', 'Ditolak')
-            ->latest('created_at')
+            ->latest('date_and_time')
             ->first();
 
         $lastPickupType = $lastPickup ? 'Permintaan ' . ucfirst($lastPickup->type) : 'Tidak ada data';
 
         $lastPickupDaysAgo = $lastPickup
-            ? Carbon::parse($lastPickup->created_at)->diffForHumans(null, true) . ' lalu'
+            ? Carbon::parse($lastPickup->date_and_time)->diffForHumans(null, true) . ' lalu'
             : 'Tidak ada data';
 
         $thisMonthPickupCount = $pickupDeliveries
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereMonth('date_and_time', now()->month)
+            ->whereYear('date_and_time', now()->year)
             ->count();
 
         return [

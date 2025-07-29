@@ -70,19 +70,21 @@ class Dashboard extends BaseDashboard
                                         ->options([
                                             'Antar' => 'Antar',
                                             'Jemput' => 'Jemput',
+                                            'Antar dan Jemput' => 'Antar dan Jemput',
                                         ])
                                         ->native(false)
                                         ->required()
                                         ->columnSpanFull(),
+                                    DateTimePicker::make('date_and_time')
+                                        ->label('Tanggal dan Waktu')
+                                        ->native(false)
+                                        ->seconds(false)
+                                        ->required(),
                                 ])->columns();
 
                             $formComponents[] = Section::make()
                                 ->description('Opsional (Boleh Dikosongkan)')
                                 ->schema([
-                                    DateTimePicker::make('date_and_time')
-                                        ->label('Tanggal dan Waktu')
-                                        ->native(false)
-                                        ->seconds(false),
                                     Textarea::make('customer_note')
                                         ->label('Catatan')
                                         ->columnSpanFull()

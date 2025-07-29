@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CustomerPickupDeliveryResource\Pages;
-use App\Filament\Resources\CustomerPickupDeliveryResource\RelationManagers;
-use App\Helper\ResourceCustomizing;
-use App\Models\PickupDelivery as CustomerPickupDelivery;
+use App\Filament\Resources\PickupDeliveryResource\Pages;
+use App\Filament\Resources\PickupDeliveryResource\RelationManagers;
+use App\Models\PickupDelivery;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,17 +12,22 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Helper\ResourceCustomizing;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
 
-class CustomerPickupDeliveryResource extends Resource
+class PickupDeliveryResource extends Resource
 {
     use ResourceCustomizing;
 
-    protected static ?string $model = CustomerPickupDelivery::class;
+    protected static ?string $model = PickupDelivery::class;
 
-    protected static ?string $title = 'Riwayat Antar Jemput';
+    protected static ?string $title = 'Antar Jemput';
 
     protected static ?string $icon = 'heroicon-o-archive-box';
 
@@ -31,19 +35,62 @@ class CustomerPickupDeliveryResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->hasRole('panel_user');
+        return auth()->user()->hasRole('super_admin');
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        Placeholder::make('name')
+                            ->label('Pelanggan')
+                            ->content(fn($record): string => $record?->customer?->user?->name ?? '-'),
+
+                        Placeholder::make('date_and_time')
+                            ->label('Tanggal dan Waktu')
+                            ->content(fn($record): string => $record?->date_and_time ?? '-'),
+
+                        Placeholder::make('type')
+                            ->label('Tipe')
+                            ->content(fn($record): string => $record?->type ?? '-'),
+
+                        Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'Menunggu Konfirmasi' => 'Menunggu Konfirmasi',
+                                'Sudah Dikonfirmasi' => 'Sudah Dikonfirmasi',
+                                'Selesai' => 'Selesai',
+                                'Ditolak' => 'Ditolak',
+                            ])
+                            ->native(false)
+                            ->required()
+                            ->reactive()
+                            ->columnSpanFull(),
+
+                        Textarea::make('laundry_note')
+                            ->label('Alasan Penolakan')
+                            ->columnSpanFull()
+                            ->maxLength(300)
+                            ->visible(fn(Forms\Get $get) => $get('status') === 'Ditolak')
+                            ->required(fn(Forms\Get $get) => $get('status') === 'Ditolak'),
+
+                        Placeholder::make('customer_note')
+                            ->label('Catatan Dari Pelanggan')
+                            ->content(fn($record): string => $record?->customer_note ?? '-'),
+                    ])->inlineLabel(),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('20s')
-            ->query(
-                static::getEloquentQuery()
-                    ->where('customer_id', auth()->user()->customer?->id ?? 0)
-                    ->orderByDesc('created_at')
-            )
+            ->defaultSort('created_at', 'desc')
             ->columns([
+                Tables\Columns\TextColumn::make('customer.user.name')
+                    ->label('Pelanggan'),
+
                 Tables\Columns\TextColumn::make('date_and_time')
                     ->label('Tanggal dan Waktu')
                     ->formatStateUsing(fn($state) => $state ? \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i') : '-'),
@@ -80,14 +127,9 @@ class CustomerPickupDeliveryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->label('Batal')
-                    ->modalHeading('Batalkan Permintaan Antar Jemput')
-                    ->modalIcon('heroicon-o-exclamation-triangle')
-                    ->visible(fn($record) => $record->status === 'Menunggu Konfirmasi'),
+                Tables\Actions\EditAction::make(),
             ]);
     }
-
 
     public static function getRelations(): array
     {
@@ -99,7 +141,8 @@ class CustomerPickupDeliveryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCustomerPickupDeliveries::route('/'),
+            'index' => Pages\ListPickupDeliveries::route('/'),
+            'edit' => Pages\EditPickupDelivery::route('/{record}/edit'),
         ];
     }
 
@@ -109,6 +152,8 @@ class CustomerPickupDeliveryResource extends Resource
             ->schema([
                 InfolistSection::make()
                     ->schema([
+                        TextEntry::make('customer.user.name')
+                            ->label('Pelanggan'),
                         TextEntry::make('date_and_time')
                             ->label('Tanggal dan Waktu'),
                         TextEntry::make('type')
@@ -128,10 +173,18 @@ class CustomerPickupDeliveryResource extends Resource
                             ->alignJustify()
                             ->visible(fn($record) => $record->status === 'Ditolak'),
                         TextEntry::make('customer_note')
-                            ->label('Catatan')
+                            ->label('Catatan Dari Pelanggan')
                             ->prose()
                             ->alignJustify(),
                     ])->inlineLabel(),
             ]);
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        /** @var class-string<Model> $modelClass */
+        $modelClass = static::$model;
+
+        return (string) $modelClass::whereNotIn('status', ['Selesai', 'Ditolak'])->count();
     }
 }

@@ -15,7 +15,7 @@ class PickupDeliveryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_customer::pickup::delivery');
+        return $user->can('view_any_pickup::delivery');
     }
 
     /**
@@ -23,7 +23,7 @@ class PickupDeliveryPolicy
      */
     public function view(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('view_customer::pickup::delivery');
+        return $user->can('view_pickup::delivery');
     }
 
     /**
@@ -31,7 +31,7 @@ class PickupDeliveryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_customer::pickup::delivery');
+        return $user->can('create_pickup::delivery');
     }
 
     /**
@@ -39,7 +39,7 @@ class PickupDeliveryPolicy
      */
     public function update(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('update_customer::pickup::delivery');
+        return $user->can('update_pickup::delivery');
     }
 
     /**
@@ -47,7 +47,7 @@ class PickupDeliveryPolicy
      */
     public function delete(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('delete_customer::pickup::delivery');
+        return $user->can('delete_pickup::delivery');
     }
 
     /**
@@ -55,7 +55,7 @@ class PickupDeliveryPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_customer::pickup::delivery');
+        return $user->can('delete_any_pickup::delivery');
     }
 
     /**
@@ -63,7 +63,7 @@ class PickupDeliveryPolicy
      */
     public function forceDelete(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('force_delete_customer::pickup::delivery');
+        return $user->can('force_delete_pickup::delivery');
     }
 
     /**
@@ -71,7 +71,7 @@ class PickupDeliveryPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_customer::pickup::delivery');
+        return $user->can('force_delete_any_pickup::delivery');
     }
 
     /**
@@ -79,7 +79,7 @@ class PickupDeliveryPolicy
      */
     public function restore(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('restore_customer::pickup::delivery');
+        return $user->can('restore_pickup::delivery');
     }
 
     /**
@@ -87,7 +87,7 @@ class PickupDeliveryPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_customer::pickup::delivery');
+        return $user->can('restore_any_pickup::delivery');
     }
 
     /**
@@ -95,7 +95,7 @@ class PickupDeliveryPolicy
      */
     public function replicate(User $user, PickupDelivery $pickupDelivery): bool
     {
-        return $user->can('replicate_customer::pickup::delivery');
+        return $user->can('replicate_pickup::delivery');
     }
 
     /**
@@ -103,6 +103,6 @@ class PickupDeliveryPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_customer::pickup::delivery');
+        return $user->can('reorder_pickup::delivery');
     }
 }
