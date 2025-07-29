@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pickup_deliveries', function (Blueprint $table) {
             $table->id();
             $table->datetime('date_and_time')->nullable();
-            $table->enum('type', ['Antar', 'Jemput']);
+            $table->enum('type', ['Antar', 'Jemput', 'Antar dan Jemput']);
             $table->enum('status', ['Menunggu Konfirmasi', 'Sudah Dikonfirmasi', 'Selesai', 'Ditolak']);
             $table->text('customer_note')->nullable();
             $table->text('laundry_note')->nullable();

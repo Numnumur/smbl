@@ -73,14 +73,6 @@ class CustomerResource extends Resource
                                         Placeholder::make('email')
                                             ->content(fn($record): string => $record->email),
                                     ]),
-                                Section::make()
-                                    ->schema([
-                                        Forms\Components\Select::make('roles')
-                                            ->relationship('roles', 'name')
-                                            ->native(false)
-                                            ->label('Peran')
-                                            ->required(),
-                                    ]),
                             ])->columnSpan(['lg' => 1]),
                     ])->columns(3)
             ])->columns(1);
@@ -177,7 +169,7 @@ class CustomerResource extends Resource
     {
         return [
             Forms\Components\TextInput::make('name')
-                ->label('Name')
+                ->label('Nama')
                 ->required()
                 ->maxLength(255),
             Forms\Components\Select::make('roles')
@@ -191,7 +183,7 @@ class CustomerResource extends Resource
                 ->required()
                 ->maxLength(255),
             Forms\Components\TextInput::make('password')
-                ->label('Password')
+                ->label('Kata Sandi')
                 ->password()
                 ->required()
                 ->revealable()
