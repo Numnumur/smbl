@@ -16,6 +16,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
 
 class CustomerResource extends Resource
 {
@@ -45,22 +48,20 @@ class CustomerResource extends Resource
                                 Group::make()
                                     ->relationship('customer')
                                     ->schema([
-                                        Forms\Components\TextInput::make('customer.whatsapp')
+                                        Forms\Components\TextInput::make('whatsapp')
                                             ->label('Nomor WhatsApp(WA)')
                                             ->maxLength(255)
                                             ->rules([
-                                                // 'required',
                                                 'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
                                             ])
                                             ->validationMessages([
-                                                // 'required' => 'Nomor WhatsApp wajib diisi.',
                                                 'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
                                             ]),
-                                        Forms\Components\Textarea::make('customer.address')
+                                        Forms\Components\Textarea::make('address')
                                             ->label('Alamat')
                                             ->columnSpanFull()
                                             ->maxLength(300),
-                                        Forms\Components\Textarea::make('customer.note')
+                                        Forms\Components\Textarea::make('note')
                                             ->label('Catatan')
                                             ->columnSpanFull()
                                             ->maxLength(300),
@@ -115,6 +116,7 @@ class CustomerResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ]);
@@ -146,11 +148,9 @@ class CustomerResource extends Resource
                         ->label('Nomor WhatsApp(WA)')
                         ->maxLength(255)
                         ->rules([
-                            // 'required',
                             'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
                         ])
                         ->validationMessages([
-                            // 'required' => 'Nomor WhatsApp wajib diisi.',
                             'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
                         ]),
                     Forms\Components\Textarea::make('address')
@@ -189,5 +189,27 @@ class CustomerResource extends Resource
                 ->revealable()
                 ->maxLength(255),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Nama'),
+                        TextEntry::make('email')
+                            ->label('Email'),
+                        TextEntry::make('customer.whatsapp')
+                            ->label('Nomor WhatsApp'),
+                        TextEntry::make('customer.address')
+                            ->label('Alamat'),
+                        TextEntry::make('customer.note')
+                            ->label('Catatan')
+                            ->prose()
+                            ->alignJustify(),
+                    ])->inlineLabel(),
+            ]);
     }
 }

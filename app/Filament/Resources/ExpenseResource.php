@@ -15,6 +15,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\ImageEntry;
 
 class ExpenseResource extends Resource
 {
@@ -86,19 +90,17 @@ class ExpenseResource extends Resource
                     ->label('Keperluan'),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('d F Y')),
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
                     ->money('Rp. '),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -106,13 +108,9 @@ class ExpenseResource extends Resource
             ])
             ->defaultSort('date', 'desc')
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -130,5 +128,45 @@ class ExpenseResource extends Resource
             'create' => Pages\CreateExpense::route('/create'),
             'edit' => Pages\EditExpense::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make('Sinar Laundry')
+                    ->schema([
+                        TextEntry::make('store_address')
+                            ->label('')
+                            ->default("Jl. Kasturi 2, RT.038/RW.006, Syamsudin Noor, Kec. Landasan Ulin, Kota Banjar Baru, Kalimantan Selatan 70724")
+                            ->columnSpanFull()
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('store_contact')
+                            ->label('')
+                            ->default("Whatsapp: +6285158803862")
+                            ->columnSpanFull()
+                            ->extraAttributes(['class' => 'text-center']),
+                    ])->extraAttributes(['class' => 'text-center']),
+                InfolistSection::make()
+                    ->schema([
+                        TextEntry::make('needs')
+                            ->label('Kebutuhan'),
+                        TextEntry::make('detail')
+                            ->label('Detail')
+                            ->prose()
+                            ->alignJustify(),
+                        TextEntry::make('date')
+                            ->label('Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('price')
+                            ->label('Harga')
+                            ->prefix('Rp. ')
+                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+                        ImageEntry::make('proof')
+                            ->label('Bukti Pengeluaran')
+                            ->height(450),
+                    ])->inlineLabel(),
+            ]);
     }
 }

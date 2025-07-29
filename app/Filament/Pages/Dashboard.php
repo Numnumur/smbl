@@ -99,7 +99,6 @@ class Dashboard extends BaseDashboard
                     ->modalSubmitActionLabel('Kirim')
                     ->modalCancelActionLabel('Tutup')
                     ->action(function (array $data) use ($user, $isIncomplete) {
-                        // Prevent action if data is incomplete
                         if ($isIncomplete) {
                             return;
                         }
@@ -208,6 +207,8 @@ class Dashboard extends BaseDashboard
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf;
                         }, $data['name'] . '.pdf');
+
+                        $this->getSavedNotification2()->send();
                     }),
             ];
         }
@@ -221,5 +222,12 @@ class Dashboard extends BaseDashboard
         return Notification::make()
             ->success()
             ->title('Permintaan Berhasil Dibuat');
+    }
+
+    protected function getSavedNotification2(): Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Laporan Berhasil Dibuat');
     }
 }

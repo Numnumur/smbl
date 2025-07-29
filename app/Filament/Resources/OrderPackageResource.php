@@ -14,6 +14,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
 
 class OrderPackageResource extends Resource
 {
@@ -94,6 +97,7 @@ class OrderPackageResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ]);
@@ -113,5 +117,23 @@ class OrderPackageResource extends Resource
             'create' => Pages\CreateOrderPackage::route('/create'),
             'edit' => Pages\EditOrderPackage::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Nama'),
+                        TextEntry::make('type')
+                            ->label('Tipe'),
+                        TextEntry::make('price')
+                            ->label('Tarif')
+                            ->prefix('Rp. ')
+                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+                    ])->inlineLabel(),
+            ]);
     }
 }
