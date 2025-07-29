@@ -14,7 +14,8 @@ class CustomerStatsOverview extends BaseWidget
 {
     use HasWidgetShield;
 
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 2;
+
     protected static ?string $pollingInterval = '20s';
 
     protected function getHeading(): ?string

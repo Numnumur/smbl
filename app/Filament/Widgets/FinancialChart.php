@@ -12,7 +12,7 @@ class FinancialChart extends ChartWidget
 {
     use HasWidgetShield;
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected static ?string $pollingInterval = '20s';
 

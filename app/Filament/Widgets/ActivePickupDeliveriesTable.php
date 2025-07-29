@@ -7,10 +7,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\TableWidget as BaseWidget;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class ActivePickupDeliveriesTable extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    use HasWidgetShield;
+
+    protected static ?int $sort = 4;
 
     protected static ?string $pollingInterval = '20s';
 

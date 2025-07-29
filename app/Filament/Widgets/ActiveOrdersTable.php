@@ -7,10 +7,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\TableWidget as BaseWidget;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class ActiveOrdersTable extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    use HasWidgetShield;
+
+    protected static ?int $sort = 3;
 
     protected static ?string $pollingInterval = '20s';
 
