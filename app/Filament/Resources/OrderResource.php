@@ -11,12 +11,18 @@ use App\Models\OrderPackage;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\ImageEntry;
 
 class OrderResource extends Resource
 {
@@ -156,6 +162,7 @@ class OrderResource extends Resource
                                 'Baru' => 'Baru',
                                 'Selesai Diproses' => 'Selesai Diproses',
                                 'Selesai' => 'Selesai',
+                                'Terkendala' => 'Terkendala',
                             ])
                             ->native(false)
                             ->default('Baru')
@@ -165,6 +172,16 @@ class OrderResource extends Resource
                             })
                             ->debounce(1200),
                     ])->columns(),
+
+                Section::make()
+                    ->visible(fn(callable $get) => $get('status') === 'Terkendala')
+                    ->schema([
+                        Textarea::make('laundry_note')
+                            ->label('Penyebab Kendala')
+                            ->columnSpanFull()
+                            ->maxLength(300)
+                            ->required(fn(Forms\Get $get) => $get('status') === 'Terkendala'),
+                    ]),
 
                 Section::make()
                     ->schema([
@@ -187,8 +204,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('cm')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1500),
@@ -197,8 +214,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('cm')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1500),
@@ -207,8 +224,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('kg')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Kiloan')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Kiloan')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Kiloan')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Kiloan')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1200),
@@ -217,8 +234,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('item')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && in_array($get('type'), ['Lembaran', 'Satuan']))
-                            ->visible(fn($get) => $get('status') !== 'Baru' && in_array($get('type'), ['Lembaran', 'Satuan']))
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && in_array($get('type'), ['Lembaran', 'Satuan']))
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && in_array($get('type'), ['Lembaran', 'Satuan']))
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1200),
@@ -228,7 +245,7 @@ class OrderResource extends Resource
                             ->prefix('Rp. ')
                             ->disabled()
                             ->dehydrated(true)
-                            ->visible(fn(callable $get) => $get('status') !== 'Baru'),
+                            ->visible(fn(callable $get) => !in_array($get('status'), ['Baru', 'Terkendala'])),
                         Forms\Components\TextInput::make('discount_name')
                             ->label('Nama Diskon')
                             ->disabled()
@@ -257,7 +274,7 @@ class OrderResource extends Resource
                             ->disabled()
                             ->disabled()
                             ->dehydrated(true)
-                            ->visible(fn(callable $get) => $get('status') !== 'Baru'),
+                            ->visible(fn(callable $get) => !in_array($get('status'), ['Baru', 'Terkendala'])),
                     ])->columns(),
 
                 Section::make()
@@ -312,6 +329,7 @@ class OrderResource extends Resource
                         'Baru' => 'info',
                         'Selesai Diproses' => 'warning',
                         'Selesai' => 'success',
+                        'Terkendala' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Pesanan Masuk')
@@ -328,12 +346,10 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -341,13 +357,9 @@ class OrderResource extends Resource
             ])
             ->defaultSort('entry_date', 'desc')
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -365,5 +377,147 @@ class OrderResource extends Resource
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make('Sinar Laundry')
+                    ->schema([
+                        TextEntry::make('store_address')
+                            ->label('')
+                            ->default("Jl. Kasturi 2, RT.038/RW.006, Syamsudin Noor, Kec. Landasan Ulin, Kota Banjar Baru, Kalimantan Selatan 70724")
+                            ->columnSpanFull()
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('store_contact')
+                            ->label('')
+                            ->default("Whatsapp: +6285158803862")
+                            ->columnSpanFull()
+                            ->extraAttributes(['class' => 'text-center']),
+                    ])->extraAttributes(['class' => 'text-center']),
+
+                InfolistSection::make()
+                    ->schema([
+                        TextEntry::make('customer.user.name')
+                            ->label('Pelanggan')
+                            ->color('info'),
+
+                        TextEntry::make('entry_date')
+                            ->label('Tanggal Masuk')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->extraAttributes(['class' => 'text-center']),
+
+                        TextEntry::make('exit_date')
+                            ->label('Tanggal Selesai')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->extraAttributes(['class' => 'text-center']),
+                    ])
+                    ->columns(3),
+
+
+                Group::make([
+                    InfolistSection::make('Pesanan')
+                        ->schema([
+                            TextEntry::make('status')
+                                ->label('Status')
+                                ->columnSpanFull()
+                                ->badge()
+                                ->color(fn(string $state): string => match ($state) {
+                                    'Baru' => 'info',
+                                    'Selesai Diproses' => 'warning',
+                                    'Selesai' => 'success',
+                                    'Terkendala' => 'danger',
+                                }),
+
+                            TextEntry::make('laundry_note')
+                                ->label('Penyebab Kendala')
+                                ->prose()
+                                ->alignJustify()
+                                ->visible(fn($record) => $record->status === 'Terkendala'),
+
+                            TextEntry::make('order_package')
+                                ->label('Paket')
+                                ->columnSpanFull(),
+
+                            TextEntry::make('type')
+                                ->label('Tipe')
+                                ->columnSpanFull(),
+
+                            TextEntry::make('price')
+                                ->label('Tarif')
+                                ->prefix('Rp. ')
+                                ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.'))
+                                ->columnSpanFull(),
+                        ])
+                        ->extraAttributes(['class' => 'text-center'])
+                        ->columns(1)
+                        ->columnSpan(1),
+
+                    InfolistSection::make('Detail')
+                        ->schema([
+                            TextEntry::make('weight')
+                                ->label('Berat')
+                                ->suffix(' kg')
+                                ->visible(fn($record) => $record->type === 'Kiloan'),
+
+                            TextEntry::make('length')
+                                ->label('Ukuran')
+                                ->visible(fn($record) => $record->type === 'Karpet')
+                                ->formatStateUsing(function ($state, $record) {
+                                    $length = $record->length / 100;
+                                    $width = $record->width / 100;
+                                    $area = $length * $width;
+
+                                    return number_format($length, 2) . ' x ' . number_format($width, 2) . ' = ' . number_format($area, 2) . ' m²';
+                                }),
+
+                            TextEntry::make('quantity')
+                                ->label('Jumlah')
+                                ->suffix(' lembar')
+                                ->visible(fn($record) => $record->type === 'Lembaran'),
+
+                            TextEntry::make('quantity')
+                                ->label('Jumlah')
+                                ->suffix(' item')
+                                ->visible(fn($record) => $record->type === 'Satuan'),
+
+                            TextEntry::make('total_price_before_discount')
+                                ->label('Total Tagihan')
+                                ->visible(fn($record) => $record->discount_value > 0)
+                                ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.'))
+                                ->prefix('Rp. '),
+
+                            TextEntry::make('discount_value')
+                                ->label(fn($record) => "Diskon {$record->discount_type}")
+                                ->helperText(fn($record) => $record->discount_name)
+                                ->visible(fn($record) => $record->discount_value > 0)
+                                ->prefix(fn($record) => $record->discount_type === 'Langsung' ? 'Rp. ' : null)
+                                ->suffix(fn($record) => $record->discount_type === 'Persentase' ? ' %' : null)
+                                ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+
+                            TextEntry::make('total_price')
+                                ->label(fn($record) => $record->discount_value > 0 ? 'Setelah Diskon' : 'Total Tagihan')
+                                ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.'))
+                                ->prefix('Rp. ')
+                                ->color('success'),
+                        ])
+                        ->extraAttributes(['class' => 'text-center'])
+                        ->columns(1)
+                        ->columnSpan(1),
+                    InfolistSection::make('Bukti Gambar')
+                        ->schema([
+                            ImageEntry::make('retrieval_proof')
+                                ->label('Pengambilan')
+                                ->height(180),
+                            ImageEntry::make('delivery_proof')
+                                ->label('Pengantaran')
+                                ->height(180),
+                        ])
+                        ->extraAttributes(['class' => 'text-center'])
+                        ->columns(2),
+
+                ])->columnSpanFull()->columns(2),
+            ]);
     }
 }

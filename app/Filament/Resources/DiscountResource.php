@@ -15,6 +15,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
 
 class DiscountResource extends Resource
 {
@@ -123,12 +126,10 @@ class DiscountResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -136,13 +137,9 @@ class DiscountResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -160,5 +157,34 @@ class DiscountResource extends Resource
             'create' => Pages\CreateDiscount::route('/create'),
             'edit' => Pages\EditDiscount::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Nama'),
+                        TextEntry::make('type')
+                            ->label('Tipe'),
+                        TextEntry::make('value')
+                            ->label('Nilai')
+                            ->prefix(fn($record) => $record->type === 'Langsung' ? 'Rp. ' : null)
+                            ->suffix(fn($record) => $record->type === 'Persentase' ? ' %' : null)
+                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+                        TextEntry::make('start_date')
+                            ->label('Dari Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('end_date')
+                            ->label('Sampai')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('orderPackage.name')
+                            ->label('Paket Pesanan'),
+                    ])->inlineLabel(),
+            ]);
     }
 }
