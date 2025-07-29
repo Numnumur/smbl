@@ -58,6 +58,7 @@ class CustomerOrderResource extends Resource
                         'Baru' => 'info',
                         'Selesai Diproses' => 'warning',
                         'Selesai' => 'success',
+                        'Terkendala' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal')
@@ -151,7 +152,14 @@ class CustomerOrderResource extends Resource
                                     'Baru' => 'info',
                                     'Selesai Diproses' => 'warning',
                                     'Selesai' => 'success',
+                                    'Terkendala' => 'danger',
                                 }),
+
+                            TextEntry::make('laundry_note')
+                                ->label('Penyebab Kendala')
+                                ->prose()
+                                ->alignJustify()
+                                ->visible(fn($record) => $record->status === 'Terkendala'),
 
                             TextEntry::make('order_package')
                                 ->label('Paket')

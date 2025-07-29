@@ -26,6 +26,7 @@ class Order extends Model
         'weight',
         'quantity',
         'customer_id',
+        'laundry_note',
         'retrieval_proof',
         'delivery_proof',
     ];

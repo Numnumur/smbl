@@ -11,6 +11,7 @@ use App\Models\OrderPackage;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -161,6 +162,7 @@ class OrderResource extends Resource
                                 'Baru' => 'Baru',
                                 'Selesai Diproses' => 'Selesai Diproses',
                                 'Selesai' => 'Selesai',
+                                'Terkendala' => 'Terkendala',
                             ])
                             ->native(false)
                             ->default('Baru')
@@ -170,6 +172,16 @@ class OrderResource extends Resource
                             })
                             ->debounce(1200),
                     ])->columns(),
+
+                Section::make()
+                    ->visible(fn(callable $get) => $get('status') === 'Terkendala')
+                    ->schema([
+                        Textarea::make('laundry_note')
+                            ->label('Penyebab Kendala')
+                            ->columnSpanFull()
+                            ->maxLength(300)
+                            ->required(fn(Forms\Get $get) => $get('status') === 'Terkendala'),
+                    ]),
 
                 Section::make()
                     ->schema([
@@ -192,8 +204,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('cm')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1500),
@@ -202,8 +214,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('cm')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Karpet')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Karpet')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1500),
@@ -212,8 +224,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('kg')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Kiloan')
-                            ->visible(fn($get) => $get('status') !== 'Baru' && $get('type') === 'Kiloan')
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Kiloan')
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && $get('type') === 'Kiloan')
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1200),
@@ -222,8 +234,8 @@ class OrderResource extends Resource
                             ->numeric()
                             ->postfix('item')
                             ->disabled(fn($get) => in_array($get('status'), ['Baru', 'Selesai']))
-                            ->required(fn($get) => $get('status') !== 'Baru' && in_array($get('type'), ['Lembaran', 'Satuan']))
-                            ->visible(fn($get) => $get('status') !== 'Baru' && in_array($get('type'), ['Lembaran', 'Satuan']))
+                            ->required(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && in_array($get('type'), ['Lembaran', 'Satuan']))
+                            ->visible(fn($get) => !in_array($get('status'), ['Baru', 'Terkendala']) && in_array($get('type'), ['Lembaran', 'Satuan']))
                             ->reactive()
                             ->afterStateUpdated($recalculateTotalPrice)
                             ->debounce(1200),
@@ -233,7 +245,7 @@ class OrderResource extends Resource
                             ->prefix('Rp. ')
                             ->disabled()
                             ->dehydrated(true)
-                            ->visible(fn(callable $get) => $get('status') !== 'Baru'),
+                            ->visible(fn(callable $get) => !in_array($get('status'), ['Baru', 'Terkendala'])),
                         Forms\Components\TextInput::make('discount_name')
                             ->label('Nama Diskon')
                             ->disabled()
@@ -262,7 +274,7 @@ class OrderResource extends Resource
                             ->disabled()
                             ->disabled()
                             ->dehydrated(true)
-                            ->visible(fn(callable $get) => $get('status') !== 'Baru'),
+                            ->visible(fn(callable $get) => !in_array($get('status'), ['Baru', 'Terkendala'])),
                     ])->columns(),
 
                 Section::make()
@@ -317,6 +329,7 @@ class OrderResource extends Resource
                         'Baru' => 'info',
                         'Selesai Diproses' => 'warning',
                         'Selesai' => 'success',
+                        'Terkendala' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Pesanan Masuk')
@@ -414,7 +427,14 @@ class OrderResource extends Resource
                                     'Baru' => 'info',
                                     'Selesai Diproses' => 'warning',
                                     'Selesai' => 'success',
+                                    'Terkendala' => 'danger',
                                 }),
+
+                            TextEntry::make('laundry_note')
+                                ->label('Penyebab Kendala')
+                                ->prose()
+                                ->alignJustify()
+                                ->visible(fn($record) => $record->status === 'Terkendala'),
 
                             TextEntry::make('order_package')
                                 ->label('Paket')

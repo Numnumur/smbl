@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->datetime('entry_date');
             $table->datetime('exit_date')->nullable();
-            $table->enum('status', ['Baru', 'Selesai Diproses', 'Selesai']);
+            $table->enum('status', ['Baru', 'Selesai Diproses', 'Terkendala', 'Selesai']);
             $table->string('order_package');
             $table->string('type');
             $table->double('price');
@@ -31,6 +31,7 @@ return new class extends Migration
             $table->double('weight')->nullable();
             $table->double('quantity')->nullable();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->text('laundry_note')->nullable();
             $table->text('retrieval_proof')->nullable();
             $table->text('delivery_proof')->nullable();
             $table->timestamps();
