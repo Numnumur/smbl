@@ -125,6 +125,18 @@ class RoleHasPermissionSeeder extends Seeder
             ['permission_id' => 113, 'role_id' => 1],
             ['permission_id' => 114, 'role_id' => 1],
             ['permission_id' => 115, 'role_id' => 1],
+            ['permission_id' => 116, 'role_id' => 1],
+            ['permission_id' => 117, 'role_id' => 1],
+            ['permission_id' => 118, 'role_id' => 1],
+            ['permission_id' => 119, 'role_id' => 1],
+            ['permission_id' => 120, 'role_id' => 1],
+            ['permission_id' => 121, 'role_id' => 1],
+            ['permission_id' => 122, 'role_id' => 1],
+            ['permission_id' => 123, 'role_id' => 1],
+            ['permission_id' => 124, 'role_id' => 1],
+            ['permission_id' => 125, 'role_id' => 1],
+            ['permission_id' => 126, 'role_id' => 1],
+            ['permission_id' => 127, 'role_id' => 1],
             ['permission_id' => 43, 'role_id' => 2],
             ['permission_id' => 44, 'role_id' => 2],
             ['permission_id' => 72, 'role_id' => 2],
@@ -141,6 +153,7 @@ class RoleHasPermissionSeeder extends Seeder
             ['permission_id' => 102, 'role_id' => 2],
             ['permission_id' => 103, 'role_id' => 2],
             ['permission_id' => 110, 'role_id' => 2],
+            ['permission_id' => 114, 'role_id' => 2],
         ];
 
         DB::table('role_has_permissions')->insert($rolePermissions);

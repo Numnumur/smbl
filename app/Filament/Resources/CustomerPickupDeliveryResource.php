@@ -220,7 +220,9 @@ class CustomerPickupDeliveryResource extends Resource
                 InfolistSection::make()
                     ->schema([
                         TextEntry::make('date_and_time')
-                            ->label('Tanggal dan Waktu'),
+                            ->label('Tanggal dan Waktu')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->extraAttributes(['class' => 'text-center']),
                         TextEntry::make('type')
                             ->label('Tipe'),
                         TextEntry::make('status')
