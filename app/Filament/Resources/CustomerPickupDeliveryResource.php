@@ -61,9 +61,14 @@ class CustomerPickupDeliveryResource extends Resource
                         'Ditolak' => 'danger',
                     }),
 
-                Tables\Columns\TextColumn::make('customer_note')
-                    ->label('Catatan')
-                    ->formatStateUsing(fn($state) => $state ?: '-'),
+                Tables\Columns\IconColumn::make('whatsapp_notified_admin')
+                    ->label('Notifikasi WA')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')

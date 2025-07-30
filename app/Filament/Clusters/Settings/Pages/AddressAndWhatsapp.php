@@ -70,13 +70,13 @@ class AddressAndWhatsapp extends Page
             ->schema([
                 TextInput::make('whatsapp')
                     ->label('Nomor WhatsApp(WA)')
-                    ->maxLength(255)
-                    ->rules([
-                        'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
-                    ])
-                    ->validationMessages([
-                        'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau 62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                    ]),
+                    ->maxLength(255),
+                // ->rules([
+                //     'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
+                // ])
+                // ->validationMessages([
+                //     'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau 62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                // ]),
                 Textarea::make('address')
                     ->label('Alamat')
                     ->columnSpanFull()

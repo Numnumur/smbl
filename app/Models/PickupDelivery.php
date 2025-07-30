@@ -14,6 +14,8 @@ class PickupDelivery extends Model
         'customer_note',
         'laundry_note',
         'customer_id',
+        'whatsapp_notified_admin',
+        'whatsapp_notified_customer',
     ];
 
     public function customer(): BelongsTo
