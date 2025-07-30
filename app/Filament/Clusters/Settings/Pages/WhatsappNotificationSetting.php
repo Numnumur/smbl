@@ -4,9 +4,11 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings;
 use Filament\Pages\Page;
+use App\Helper\PageCustomizing;
+use App\Models\WhatsappSetting as WhatsappSettingModel;
+use Filament\Forms\Concerns\InteractsWithForms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Livewire\Attributes\Locked;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Customer as CustomerModel;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Section;
@@ -18,29 +20,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Access\AuthorizationException;
 use function Filament\authorize;
 use Filament\Notifications\Notification;
-use App\Helper\PageCustomizing;
-use Filament\Forms\Concerns\InteractsWithForms;
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
-
-class AddressAndWhatsapp extends Page
+class WhatsappNotificationSetting extends Page
 {
     use InteractsWithForms, PageCustomizing, HasPageShield;
 
     public ?array $data = [];
 
     #[Locked]
-    public ?CustomerModel $record = null;
+    public ?WhatsappSettingModel $record = null;
 
-    protected static ?string $title = 'Alamat dan WhatsApp';
+    protected static ?string $title = 'Pengaturan Notifikasi WhatsApp';
 
-    protected static string $view = 'filament.clusters.settings.pages.address-and-whatsapp';
+    protected static string $view = 'filament.clusters.settings.pages.whatsapp-notification-setting';
 
     protected static ?string $cluster = Settings::class;
 
     public function mount(): void
     {
-        $this->record = Auth::user()?->customer;
+        $this->record = WhatsappSettingModel::first();
 
         $this->fillForm();
     }
@@ -58,29 +56,33 @@ class AddressAndWhatsapp extends Page
     {
         return $form
             ->schema([
-                $this->getCustomer(),
+                $this->getWhatsappSetting(),
             ])
             ->statePath('data')
             ->operation('edit');
     }
 
-    protected function getCustomer(): Component
+    protected function getWhatsappSetting(): Component
     {
         return Section::make()
             ->schema([
-                TextInput::make('whatsapp')
-                    ->label('Nomor WhatsApp(WA)')
+                TextInput::make('admin_whatsapp_number')
+                    ->label('Nomor WhatsApp Admin')
+                    ->helperText('Digunakan untuk menerima notifikasi antar jemput dari pelanggan')
                     ->maxLength(255)
-                    ->rules([
-                        'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
-                    ])
-                    ->validationMessages([
-                        'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau 62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                    ]),
-                Textarea::make('address')
-                    ->label('Alamat')
-                    ->columnSpanFull()
-                    ->maxLength(300),
+                    // ->rules([
+                    //     'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
+                    // ])
+                    // ->validationMessages([
+                    //     'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                    // ])
+                    ->columnSpan(1),
+                TextInput::make('fonnte_token')
+                    ->label('Token Fonnte')
+                    ->helperText('Digunakan untuk mengirim notifikasi WhatsApp')
+                    ->maxLength(255)
+                    ->columnSpan(1)
+                    ->columnSpanFull(),
             ])->columns();
     }
 
@@ -96,7 +98,7 @@ class AddressAndWhatsapp extends Page
 
         $this->getSavedNotification()->send();
 
-        return redirect()->route('filament.admin.settings.pages.address-and-whatsapp');
+        return redirect()->route('filament.admin.settings.pages.whatsapp-notification-setting');
     }
 
     protected function getSavedNotification(): Notification
@@ -121,7 +123,7 @@ class AddressAndWhatsapp extends Page
             ->keyBindings(['mod+s']);
     }
 
-    protected function handleRecordUpdate(CustomerModel $record, array $data): CustomerModel
+    protected function handleRecordUpdate(WhatsappSettingModel $record, array $data): WhatsappSettingModel
     {
         $record->fill($data);
 

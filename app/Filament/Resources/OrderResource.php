@@ -23,6 +23,10 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
+use App\Models\WhatsappSetting;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class OrderResource extends Resource
 {
@@ -374,21 +378,39 @@ class OrderResource extends Resource
                         $customer = $record->customer;
 
                         if (!$customer || !$customer->whatsapp) {
-                            \Illuminate\Support\Facades\Log::warning("WhatsApp tidak tersedia untuk customer ID: {$customer?->id}");
+                            Log::warning("WhatsApp tidak tersedia untuk customer ID: {$customer?->id}");
                             $record->whatsapp_notified = false;
                             $record->saveQuietly();
-                            \Filament\Notifications\Notification::make()
+
+                            Notification::make()
+                                ->danger()
                                 ->title('Gagal')
                                 ->body('Nomor WhatsApp tidak tersedia.')
-                                ->danger()
                                 ->send();
+
                             return;
                         }
 
-                        $dateFormatted   = \Carbon\Carbon::parse($record->start_date)->translatedFormat('l, d F Y');
-                        $totalFormatted  = 'Rp. ' . number_format($record->total_price, 0, ',', '.');
-                        $customerName    = $customer->user->name;
-                        $isTerkendala    = $record->status === 'Terkendala';
+                        $token = WhatsappSetting::first()?->fonnte_token;
+
+                        if (!$token) {
+                            Log::error('Token Fonnte tidak tersedia di WhatsappSetting.');
+                            $record->whatsapp_notified = false;
+                            $record->saveQuietly();
+
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal')
+                                ->body('Token Fonnte belum disetel.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $dateFormatted  = Carbon::parse($record->start_date)->translatedFormat('l, d F Y');
+                        $totalFormatted = 'Rp. ' . number_format($record->total_price, 0, ',', '.');
+                        $customerName   = $customer->user->name;
+                        $isTerkendala   = $record->status === 'Terkendala';
 
                         $lines = [
                             "~~ Sinar Laundry ~~",
@@ -417,7 +439,6 @@ class OrderResource extends Resource
 
                         $message = implode("\n", $lines);
                         $target = $customer->whatsapp;
-                        $token = config('services.fonnte.token');
 
                         try {
                             $curl = curl_init();
@@ -444,46 +465,49 @@ class OrderResource extends Resource
                             curl_close($curl);
 
                             if ($error) {
-                                \Illuminate\Support\Facades\Log::error("cURL error saat kirim ke Fonnte: {$error}");
+                                Log::error("cURL error saat kirim ke Fonnte: {$error}");
                                 $record->whatsapp_notified = false;
-                                \Filament\Notifications\Notification::make()
+
+                                Notification::make()
+                                    ->danger()
                                     ->title('Gagal')
                                     ->body('Gagal mengirim pesan WhatsApp.')
-                                    ->danger()
                                     ->send();
                             } else {
                                 $responseData = json_decode($response, true);
 
                                 if (isset($responseData['status']) && $responseData['status'] == true) {
                                     $record->whatsapp_notified = true;
-                                    \Filament\Notifications\Notification::make()
+
+                                    Notification::make()
+                                        ->success()
                                         ->title('Berhasil')
                                         ->body('Pesan WhatsApp berhasil dikirim.')
-                                        ->success()
                                         ->send();
                                 } else {
-                                    \Illuminate\Support\Facades\Log::warning("Fonnte gagal merespon sukses: {$response}");
+                                    Log::warning("Fonnte gagal merespon sukses: {$response}");
                                     $record->whatsapp_notified = false;
-                                    \Filament\Notifications\Notification::make()
+
+                                    Notification::make()
+                                        ->danger()
                                         ->title('Gagal')
                                         ->body('Fonnte gagal mengirim pesan.')
-                                        ->danger()
                                         ->send();
                                 }
 
-                                \Illuminate\Support\Facades\Log::info("Fonnte response untuk Order ID {$record->id}: {$response}");
+                                Log::info("Fonnte response untuk Order ID {$record->id}: {$response}");
                             }
 
                             $record->saveQuietly();
                         } catch (\Throwable $e) {
-                            \Illuminate\Support\Facades\Log::error("Exception saat kirim ke Fonnte: " . $e->getMessage());
+                            Log::error("Exception saat kirim ke Fonnte: " . $e->getMessage());
                             $record->whatsapp_notified = false;
                             $record->saveQuietly();
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
+                                ->danger()
                                 ->title('Error')
                                 ->body('Terjadi kesalahan internal.')
-                                ->danger()
                                 ->send();
                         }
                     }),

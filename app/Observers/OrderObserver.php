@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Models\WhatsappSetting;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -26,12 +27,20 @@ class OrderObserver
             return;
         }
 
+        $token = WhatsappSetting::first()?->fonnte_token;
+
+        if (!$token) {
+            Log::error('Token Fonnte tidak tersedia di WhatsappSetting.');
+            $order->whatsapp_notified = false;
+            $order->saveQuietly();
+            return;
+        }
+
         $dateFormatted   = Carbon::parse($order->start_date)->translatedFormat('l, d F Y');
         $totalFormatted  = 'Rp. ' . number_format($order->total_price, 0, ',', '.');
         $customerName    = $customer->user->name;
         $isTerkendala    = $order->status === 'Terkendala';
 
-        // Susun isi pesan
         $lines = [
             "~~ Sinar Laundry ~~",
             "",
@@ -45,7 +54,6 @@ class OrderObserver
             $lines[] = "Biaya Pesanan : *{$totalFormatted}*";
         }
 
-        // Status dan footer
         if ($isTerkendala) {
             $lines[] = "*Sedang Terkendala ⚠️*";
             $lines[] = "";
@@ -59,9 +67,7 @@ class OrderObserver
         }
 
         $message = implode("\n", $lines);
-
         $target = $customer->whatsapp;
-        $token = config('services.fonnte.token');
 
         try {
             $curl = curl_init();

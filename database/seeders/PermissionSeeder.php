@@ -128,6 +128,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'force_delete_pickup::delivery', 'guard_name' => 'web'],
             ['name' => 'force_delete_any_pickup::delivery', 'guard_name' => 'web'],
             ['name' => 'widget_ClockWidget', 'guard_name' => 'web'],
+            ['name' => 'page_WhatsappNotificationSetting', 'guard_name' => 'web'],
         ];
 
         foreach ($permissions as $permission) {
