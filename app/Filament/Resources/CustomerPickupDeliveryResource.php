@@ -16,6 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use App\Models\WhatsappSetting;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+
 
 class CustomerPickupDeliveryResource extends Resource
 {
@@ -84,6 +90,105 @@ class CustomerPickupDeliveryResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('kirimWaAdmin')
+                    ->label('Kirim Notifikasi WA')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->visible(
+                        fn($record) =>
+                        $record->status === 'Menunggu Konfirmasi' &&
+                            !$record->whatsapp_notified_admin
+                    )
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $token = WhatsappSetting::first()?->fonnte_token;
+                        $adminNumber = WhatsappSetting::first()?->admin_whatsapp_number;
+
+                        if (!$adminNumber || !$token) {
+                            Log::error("WA Admin atau token tidak tersedia.");
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal')
+                                ->body('Nomor admin atau token Fonnte tidak tersedia.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $customer = $record->customer;
+                        $customerName = $customer->user->name;
+                        $dateTime = Carbon::parse($record->date_and_time)->translatedFormat('l, d F Y H:i');
+
+                        $message = implode("\n", [
+                            "~~ Sinar Laundry ~~",
+                            "",
+                            "*Ada permintaan antar jemput baru* dari pelanggan berikut",
+                            "Nama                         : {$customerName}",
+                            "Tipe Permintaan         : {$record->type}",
+                            "Tanggal dan Waktu    : {$dateTime}",
+                            "Catatan Pelanggan     : {$record->customer_note}",
+                            "Alamat                        : {$customer->address}",
+                            "",
+                            "Silahkan lakukan konfirmasi lewat web."
+                        ]);
+
+                        try {
+                            $curl = curl_init();
+                            curl_setopt_array($curl, [
+                                CURLOPT_URL => 'https://api.fonnte.com/send',
+                                CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_POST => true,
+                                CURLOPT_POSTFIELDS => [
+                                    'target' => $adminNumber,
+                                    'message' => $message,
+                                ],
+                                CURLOPT_HTTPHEADER => [
+                                    "Authorization: {$token}",
+                                ],
+                            ]);
+
+                            $response = curl_exec($curl);
+                            $error = curl_error($curl);
+                            curl_close($curl);
+
+                            if ($error) {
+                                Log::error("cURL error: {$error}");
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Gagal')
+                                    ->body('Gagal mengirim pesan WA ke admin.')
+                                    ->send();
+                                return;
+                            }
+
+                            $data = json_decode($response, true);
+
+                            if ($data['status'] ?? false) {
+                                $record->whatsapp_notified_admin = true;
+                                Notification::make()
+                                    ->success()
+                                    ->title('Berhasil')
+                                    ->body('Pesan WA berhasil dikirim ke admin.')
+                                    ->send();
+                            } else {
+                                Log::warning("Fonnte gagal: {$response}");
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Gagal')
+                                    ->body('Fonnte gagal merespon sukses.')
+                                    ->send();
+                            }
+
+                            $record->saveQuietly();
+                        } catch (\Throwable $e) {
+                            Log::error("Exception saat kirim ke admin: {$e->getMessage()}");
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body('Terjadi kesalahan saat mengirim WA.')
+                                ->send();
+                        }
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->label('Batal')

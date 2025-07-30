@@ -372,7 +372,11 @@ class OrderResource extends Resource
                     ->label('Kirim Notifikasi WA')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
-                    ->visible(fn($record) => in_array($record->status, ['Selesai', 'Terkendala']))
+                    ->visible(
+                        fn($record) =>
+                        in_array($record->status, ['Selesai', 'Terkendala']) &&
+                            !$record->whatsapp_notified
+                    )
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         $customer = $record->customer;

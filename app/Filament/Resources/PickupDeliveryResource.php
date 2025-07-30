@@ -20,6 +20,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use App\Models\WhatsappSetting;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+
 
 class PickupDeliveryResource extends Resource
 {
@@ -86,6 +92,7 @@ class PickupDeliveryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('20s')
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('customer.user.name')
@@ -131,6 +138,120 @@ class PickupDeliveryResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('kirimWaCustomer')
+                    ->label('Kirim Notifikasi WA')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->visible(
+                        fn($record) =>
+                        !$record->whatsapp_notified_customer &&
+                            in_array($record->status, ['Sudah Dikonfirmasi', 'Ditolak'])
+                    )
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $token = WhatsappSetting::first()?->fonnte_token;
+
+                        $customer = $record->customer;
+                        $target = $customer->whatsapp;
+
+                        if (!$token || !$target) {
+                            Log::error("Token Fonnte atau nomor customer tidak tersedia.");
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal')
+                                ->body('Token atau nomor WA customer belum disetel.')
+                                ->send();
+                            return;
+                        }
+
+                        $customerName = $customer->user->name;
+                        $dateTime = Carbon::parse($record->date_and_time)->translatedFormat('l, d F Y H:i');
+
+                        $header = [
+                            "~~ Sinar Laundry ~~",
+                            "",
+                            "*Permintaan Antar Jemput Anda*",
+                            "Atas Nama                  : {$customerName}",
+                            "Tipe Permintaan         : {$record->type}",
+                            "Tanggal dan Waktu    : {$dateTime}",
+                            "Catatan Pelanggan     : {$record->customer_note}",
+                            "",
+                        ];
+
+                        if ($record->status === 'Sudah Dikonfirmasi') {
+                            $body = [
+                                "✅ *Sudah dikonfirmasi oleh admin* dan akan dilakukan sesuai dengan waktu yang anda tentukan.",
+                            ];
+                        } elseif ($record->status === 'Ditolak') {
+                            $body = [
+                                "❌ *Ditolak oleh admin*.",
+                                "Penyebab Penolakan: {$record->laundry_note}",
+                                "",
+                                "Dimohon pengertiannya, anda juga dapat mengajukan permintaan antar jemput lagi.",
+                            ];
+                        } else {
+                            return;
+                        }
+
+                        $message = implode("\n", array_merge($header, $body));
+
+                        try {
+                            $curl = curl_init();
+                            curl_setopt_array($curl, [
+                                CURLOPT_URL => 'https://api.fonnte.com/send',
+                                CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_POST => true,
+                                CURLOPT_POSTFIELDS => [
+                                    'target' => $target,
+                                    'message' => $message,
+                                ],
+                                CURLOPT_HTTPHEADER => [
+                                    "Authorization: {$token}",
+                                ],
+                            ]);
+
+                            $response = curl_exec($curl);
+                            $error = curl_error($curl);
+                            curl_close($curl);
+
+                            if ($error) {
+                                Log::error("cURL error: {$error}");
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Gagal')
+                                    ->body('Gagal mengirim WA ke customer.')
+                                    ->send();
+                                return;
+                            }
+
+                            $data = json_decode($response, true);
+
+                            if ($data['status'] ?? false) {
+                                $record->whatsapp_notified_customer = true;
+                                Notification::make()
+                                    ->success()
+                                    ->title('Berhasil')
+                                    ->body('Pesan WA berhasil dikirim ke customer.')
+                                    ->send();
+                            } else {
+                                Log::warning("Fonnte gagal: {$response}");
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Gagal')
+                                    ->body('Fonnte gagal merespon sukses.')
+                                    ->send();
+                            }
+
+                            $record->saveQuietly();
+                        } catch (\Throwable $e) {
+                            Log::error("Exception saat kirim WA ke customer: {$e->getMessage()}");
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body('Terjadi kesalahan saat mengirim WA.')
+                                ->send();
+                        }
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ]);
