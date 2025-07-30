@@ -50,13 +50,13 @@ class CustomerResource extends Resource
                                     ->schema([
                                         Forms\Components\TextInput::make('whatsapp')
                                             ->label('Nomor WhatsApp(WA)')
-                                            ->maxLength(255)
-                                            ->rules([
-                                                'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
-                                            ])
-                                            ->validationMessages([
-                                                'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                                            ]),
+                                            ->maxLength(255),
+                                        // ->rules([
+                                        //     'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
+                                        // ])
+                                        // ->validationMessages([
+                                        //     'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau 62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                                        // ]),
                                         Forms\Components\Textarea::make('address')
                                             ->label('Alamat')
                                             ->columnSpanFull()
@@ -148,7 +148,7 @@ class CustomerResource extends Resource
                         ->label('Nomor WhatsApp(WA)')
                         ->maxLength(255)
                         ->rules([
-                            'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
+                            'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
                         ])
                         ->validationMessages([
                             'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',

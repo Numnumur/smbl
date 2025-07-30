@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Localization;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Colors\Color;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (Schema::hasTable('localizations')) {
+            Order::observe(OrderObserver::class);
+
             $localization = Localization::first();
 
             $timezone = $localization?->timezone ?? 'UTC';

@@ -29,6 +29,7 @@ class Order extends Model
         'laundry_note',
         'retrieval_proof',
         'delivery_proof',
+        'whatsapp_notified',
     ];
 
     public function customer(): BelongsTo

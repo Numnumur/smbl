@@ -18,7 +18,7 @@ class CustomerSeeder extends Seeder
             ['user_id' => 1],
 
             // ----------- 2
-            ['user_id' => 2],
+            ['user_id' => 2, 'whatsapp' => '6285161248062'],
 
             // ----------- 3
             ['user_id' => 3],
@@ -72,7 +72,7 @@ class CustomerSeeder extends Seeder
             ['user_id' => 19],
 
             // ----------- 20
-            ['user_id' => 20],
+            ['user_id' => 20, 'whatsapp' => '6289675361337'],
 
             // ----------- 21
             ['user_id' => 21],
