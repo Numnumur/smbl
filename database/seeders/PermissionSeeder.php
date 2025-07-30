@@ -128,6 +128,19 @@ class PermissionSeeder extends Seeder
             ['name' => 'force_delete_pickup::delivery', 'guard_name' => 'web'],
             ['name' => 'force_delete_any_pickup::delivery', 'guard_name' => 'web'],
             ['name' => 'widget_ClockWidget', 'guard_name' => 'web'],
+            ['name' => 'page_WhatsappNotificationSetting', 'guard_name' => 'web'],
+            ['name' => 'view_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'view_any_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'create_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'update_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'restore_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'restore_any_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'replicate_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'reorder_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'delete_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'delete_any_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'force_delete_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'force_delete_any_whatsapp::broadcast', 'guard_name' => 'web'],
         ];
 
         foreach ($permissions as $permission) {

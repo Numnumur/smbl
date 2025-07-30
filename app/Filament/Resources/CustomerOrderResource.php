@@ -130,12 +130,12 @@ class CustomerOrderResource extends Resource
                     ->schema([
                         TextEntry::make('entry_date')
                             ->label('Tanggal Masuk')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
 
                         TextEntry::make('exit_date')
                             ->label('Tanggal Selesai')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
                     ])
                     ->columns(2),

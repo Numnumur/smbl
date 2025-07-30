@@ -23,6 +23,10 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
+use App\Models\WhatsappSetting;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class OrderResource extends Resource
 {
@@ -317,6 +321,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('20s')
             ->columns([
                 Tables\Columns\TextColumn::make('customer.user.name')
                     ->label('Pelanggan')
@@ -334,15 +339,21 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Pesanan Masuk')
                     ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
-                Tables\Columns\TextColumn::make('exit_date')
-                    ->label('Tanggal Pesanan Selesai')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
                 Tables\Columns\TextColumn::make('order_package')
                     ->label('Paket Pesanan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total_price')
                     ->label('Total Harga')
                     ->money('Rp. '),
+                Tables\Columns\IconColumn::make('whatsapp_notified')
+                    ->label('Notifikasi WA')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -357,6 +368,153 @@ class OrderResource extends Resource
             ])
             ->defaultSort('entry_date', 'desc')
             ->actions([
+                Tables\Actions\Action::make('kirimWhatsapp')
+                    ->label('Kirim Notifikasi WA')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->visible(
+                        fn($record) =>
+                        in_array($record->status, ['Selesai', 'Terkendala']) &&
+                            !$record->whatsapp_notified
+                    )
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $customer = $record->customer;
+
+                        if (!$customer || !$customer->whatsapp) {
+                            Log::warning("WhatsApp tidak tersedia untuk customer ID: {$customer?->id}");
+                            $record->whatsapp_notified = false;
+                            $record->saveQuietly();
+
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal')
+                                ->body('Nomor WhatsApp tidak tersedia.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $token = WhatsappSetting::first()?->fonnte_token;
+
+                        if (!$token) {
+                            Log::error('Token Fonnte tidak tersedia di WhatsappSetting.');
+                            $record->whatsapp_notified = false;
+                            $record->saveQuietly();
+
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal')
+                                ->body('Token Fonnte belum disetel.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $dateFormatted  = Carbon::parse($record->start_date)->translatedFormat('l, d F Y');
+                        $totalFormatted = 'Rp. ' . number_format($record->total_price, 0, ',', '.');
+                        $customerName   = $customer->user->name;
+                        $isTerkendala   = $record->status === 'Terkendala';
+
+                        $lines = [
+                            "~~ Sinar Laundry ~~",
+                            "",
+                            "*Pesanan Anda:*",
+                            "Pada                : {$dateFormatted}",
+                            "Atas Nama      : {$customerName}",
+                            "Paket Pesanan : {$record->order_package}",
+                        ];
+
+                        if (!$isTerkendala) {
+                            $lines[] = "Biaya Pesanan : *{$totalFormatted}*";
+                        }
+
+                        if ($isTerkendala) {
+                            $lines[] = "*Sedang Terkendala ⚠️*";
+                            $lines[] = "";
+                            $lines[] = "Penyebab kendala: {$record->laundry_note}";
+                            $lines[] = "";
+                            $lines[] = "Mohon maaf atas ketidaknyamanannya.";
+                        } else {
+                            $lines[] = "*Telah Selesai ✅*";
+                            $lines[] = "";
+                            $lines[] = "Anda dapat mengajukan *pengantaran* atau mengambilnya secara langsung.";
+                        }
+
+                        $message = implode("\n", $lines);
+                        $target = $customer->whatsapp;
+
+                        try {
+                            $curl = curl_init();
+                            curl_setopt_array($curl, [
+                                CURLOPT_URL => 'https://api.fonnte.com/send',
+                                CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_ENCODING => '',
+                                CURLOPT_MAXREDIRS => 10,
+                                CURLOPT_TIMEOUT => 0,
+                                CURLOPT_FOLLOWLOCATION => true,
+                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                CURLOPT_CUSTOMREQUEST => 'POST',
+                                CURLOPT_POSTFIELDS => [
+                                    'target'  => $target,
+                                    'message' => $message,
+                                ],
+                                CURLOPT_HTTPHEADER => [
+                                    "Authorization: {$token}",
+                                ],
+                            ]);
+
+                            $response = curl_exec($curl);
+                            $error = curl_error($curl);
+                            curl_close($curl);
+
+                            if ($error) {
+                                Log::error("cURL error saat kirim ke Fonnte: {$error}");
+                                $record->whatsapp_notified = false;
+
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Gagal')
+                                    ->body('Gagal mengirim pesan WhatsApp.')
+                                    ->send();
+                            } else {
+                                $responseData = json_decode($response, true);
+
+                                if (isset($responseData['status']) && $responseData['status'] == true) {
+                                    $record->whatsapp_notified = true;
+
+                                    Notification::make()
+                                        ->success()
+                                        ->title('Berhasil')
+                                        ->body('Pesan WhatsApp berhasil dikirim.')
+                                        ->send();
+                                } else {
+                                    Log::warning("Fonnte gagal merespon sukses: {$response}");
+                                    $record->whatsapp_notified = false;
+
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('Gagal')
+                                        ->body('Fonnte gagal mengirim pesan.')
+                                        ->send();
+                                }
+
+                                Log::info("Fonnte response untuk Order ID {$record->id}: {$response}");
+                            }
+
+                            $record->saveQuietly();
+                        } catch (\Throwable $e) {
+                            Log::error("Exception saat kirim ke Fonnte: " . $e->getMessage());
+                            $record->whatsapp_notified = false;
+                            $record->saveQuietly();
+
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body('Terjadi kesalahan internal.')
+                                ->send();
+                        }
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -405,12 +563,12 @@ class OrderResource extends Resource
 
                         TextEntry::make('entry_date')
                             ->label('Tanggal Masuk')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
 
                         TextEntry::make('exit_date')
                             ->label('Tanggal Selesai')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
                     ])
                     ->columns(3),

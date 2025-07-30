@@ -15,8 +15,6 @@ class ActiveOrdersTable extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    protected static ?string $pollingInterval = '20s';
-
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Pesanan Aktif';
@@ -64,6 +62,7 @@ class ActiveOrdersTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
+            ->poll('20s')
             ->query($this->getTableQuery())
             ->columns($this->getTableColumns())
             ->paginated(false);

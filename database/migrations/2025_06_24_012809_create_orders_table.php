@@ -34,6 +34,7 @@ return new class extends Migration
             $table->text('laundry_note')->nullable();
             $table->text('retrieval_proof')->nullable();
             $table->text('delivery_proof')->nullable();
+            $table->boolean('whatsapp_notified')->default(false);
             $table->timestamps();
         });
     }

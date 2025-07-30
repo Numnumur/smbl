@@ -49,14 +49,22 @@ class CustomerResource extends Resource
                                     ->relationship('customer')
                                     ->schema([
                                         Forms\Components\TextInput::make('whatsapp')
-                                            ->label('Nomor WhatsApp(WA)')
-                                            ->maxLength(255)
+                                            ->label('Nomor WhatsApp (WA)')
+                                            ->maxLength(15)
+                                            ->helperText('Contoh nomor WA: 628xxxxxxxxxx')
+                                            ->prefix('+')
                                             ->rules([
-                                                'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
+                                                'regex:/^62[0-9]{7,13}$/',
                                             ])
                                             ->validationMessages([
-                                                'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                                                'regex' => 'Nomor WhatsApp harus diawali dengan 62 dan hanya boleh mengandung angka tanpa spasi atau karakter lain.',
+                                            ])
+                                            ->inputMode('numeric')
+                                            ->extraAttributes([
+                                                'inputmode' => 'numeric',
+                                                'pattern' => '[0-9]*',
                                             ]),
+
                                         Forms\Components\Textarea::make('address')
                                             ->label('Alamat')
                                             ->columnSpanFull()
@@ -92,8 +100,9 @@ class CustomerResource extends Resource
                     ->label('Nama')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('customer.whatsapp')
-                    ->label('Nomor WhatsApp(WA)')
-                    ->searchable(),
+                    ->label('Nomor WhatsApp (WA)')
+                    ->searchable()
+                    ->prefix('+'),
                 Tables\Columns\TextColumn::make('customer.address')
                     ->label('Alamat')
                     ->wrap(),
@@ -103,12 +112,10 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('customer.created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('customer.updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -145,13 +152,20 @@ class CustomerResource extends Resource
                 ->relationship('customer')
                 ->schema([
                     Forms\Components\TextInput::make('whatsapp')
-                        ->label('Nomor WhatsApp(WA)')
-                        ->maxLength(255)
+                        ->label('Nomor WhatsApp (WA)')
+                        ->maxLength(15)
+                        ->helperText('Contoh nomor WA: 628xxxxxxxxxx')
+                        ->prefix('+')
                         ->rules([
-                            'regex:/^(08|\+62)([0-9\s\-]{6,15})$/',
+                            'regex:/^62[0-9]{7,13}$/',
                         ])
                         ->validationMessages([
-                            'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
+                            'regex' => 'Nomor WhatsApp harus diawali dengan 62 dan hanya boleh mengandung angka tanpa spasi atau karakter lain.',
+                        ])
+                        ->inputMode('numeric')
+                        ->extraAttributes([
+                            'inputmode' => 'numeric',
+                            'pattern' => '[0-9]*',
                         ]),
                     Forms\Components\Textarea::make('address')
                         ->label('Alamat')
@@ -202,7 +216,8 @@ class CustomerResource extends Resource
                         TextEntry::make('email')
                             ->label('Email'),
                         TextEntry::make('customer.whatsapp')
-                            ->label('Nomor WhatsApp'),
+                            ->label('Nomor WhatsApp')
+                            ->prefix('+'),
                         TextEntry::make('customer.address')
                             ->label('Alamat'),
                         TextEntry::make('customer.note')

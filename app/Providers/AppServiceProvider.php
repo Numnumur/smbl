@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Localization;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Colors\Color;
+use App\Models\Order;
+use App\Observers\OrderObserver;
+use App\Models\PickupDelivery;
+use App\Observers\PickupDeliveryObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,7 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Order::observe(OrderObserver::class);
+        PickupDelivery::observe(PickupDeliveryObserver::class);
+
         if (Schema::hasTable('localizations')) {
+
             $localization = Localization::first();
 
             $timezone = $localization?->timezone ?? 'UTC';

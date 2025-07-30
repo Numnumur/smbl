@@ -15,8 +15,6 @@ class ActivePickupDeliveriesTable extends BaseWidget
 
     protected static ?int $sort = 4;
 
-    protected static ?string $pollingInterval = '20s';
-
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Antar Jemput Aktif';
@@ -47,12 +45,22 @@ class ActivePickupDeliveriesTable extends BaseWidget
                     'Ditolak' => 'danger',
                     default => 'gray',
                 }),
+
+            Tables\Columns\IconColumn::make('whatsapp_notified_admin')
+                ->label('Notifikasi WA')
+                ->boolean()
+                ->trueIcon('heroicon-o-check-circle')
+                ->falseIcon('heroicon-o-x-circle')
+                ->trueColor('success')
+                ->falseColor('gray')
+                ->tooltip(fn($record) => $record->whatsapp_notified_admin ? 'Terkirim' : 'Belum Terkirim'),
         ];
     }
 
     public function table(Table $table): Table
     {
         return $table
+            ->poll('20s')
             ->query($this->getTableQuery())
             ->columns($this->getTableColumns())
             ->paginated(false);

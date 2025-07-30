@@ -80,7 +80,12 @@ class Dashboard extends BaseDashboard
                                         ->label('Tanggal dan Waktu')
                                         ->native(false)
                                         ->seconds(false)
-                                        ->required(),
+                                        ->required()
+                                        ->rules(['after_or_equal:now'])
+                                        ->validationMessages([
+                                            'after_or_equal' => 'Tanggal dan waktu harus sama dengan atau setelah waktu sekarang.',
+                                        ])
+                                        ->minDate(now()),
                                 ])->columns();
 
                             $formComponents[] = Section::make()

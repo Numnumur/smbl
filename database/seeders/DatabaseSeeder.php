@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             RoleHasPermissionSeeder::class,
             ModelHasRoleSeeder::class,
+            WhatsappSettingSeeder::class,
         ]);
     }
 }

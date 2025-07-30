@@ -19,6 +19,8 @@ return new class extends Migration
             $table->text('customer_note')->nullable();
             $table->text('laundry_note')->nullable();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->boolean('whatsapp_notified_admin')->default(false);
+            $table->boolean('whatsapp_notified_customer')->default(false);
             $table->timestamps();
         });
     }
