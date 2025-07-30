@@ -69,14 +69,21 @@ class AddressAndWhatsapp extends Page
         return Section::make()
             ->schema([
                 TextInput::make('whatsapp')
-                    ->label('Nomor WhatsApp(WA)')
-                    ->maxLength(255),
-                // ->rules([
-                //     'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
-                // ])
-                // ->validationMessages([
-                //     'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau 62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                // ]),
+                    ->label('Nomor WhatsApp (WA)')
+                    ->maxLength(15)
+                    ->helperText('Contoh nomor WA: 628xxxxxxxxxx')
+                    ->prefix('+')
+                    ->rules([
+                        'regex:/^62[0-9]{7,13}$/',
+                    ])
+                    ->validationMessages([
+                        'regex' => 'Nomor WhatsApp harus diawali dengan 62 dan hanya boleh mengandung angka tanpa spasi atau karakter lain.',
+                    ])
+                    ->inputMode('numeric')
+                    ->extraAttributes([
+                        'inputmode' => 'numeric',
+                        'pattern' => '[0-9]*',
+                    ]),
                 Textarea::make('address')
                     ->label('Alamat')
                     ->columnSpanFull()

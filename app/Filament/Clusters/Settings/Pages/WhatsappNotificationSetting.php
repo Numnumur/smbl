@@ -68,15 +68,20 @@ class WhatsappNotificationSetting extends Page
             ->schema([
                 TextInput::make('admin_whatsapp_number')
                     ->label('Nomor WhatsApp Admin')
-                    ->helperText('Digunakan untuk menerima notifikasi antar jemput dari pelanggan')
-                    ->maxLength(255)
-                    // ->rules([
-                    //     'regex:/^(08|\62)([0-9\s\-]{6,15})$/',
-                    // ])
-                    // ->validationMessages([
-                    //     'regex' => 'Nomor WhatsApp harus diawali dengan 08 atau +62, dan hanya boleh mengandung angka, spasi, atau tanda strip (-).',
-                    // ])
-                    ->columnSpan(1),
+                    ->maxLength(15)
+                    ->helperText('Contoh nomor WA: 628xxxxxxxxxx')
+                    ->prefix('+')
+                    ->rules([
+                        'regex:/^62[0-9]{7,13}$/',
+                    ])
+                    ->validationMessages([
+                        'regex' => 'Nomor WhatsApp harus diawali dengan 62 dan hanya boleh mengandung angka tanpa spasi atau karakter lain.',
+                    ])
+                    ->inputMode('numeric')
+                    ->extraAttributes([
+                        'inputmode' => 'numeric',
+                        'pattern' => '[0-9]*',
+                    ]),
                 TextInput::make('fonnte_token')
                     ->label('Token Fonnte')
                     ->helperText('Digunakan untuk mengirim notifikasi WhatsApp')
