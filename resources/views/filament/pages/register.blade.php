@@ -11,7 +11,7 @@
                     }
                 }
 
-                $title = 'Masuk';
+                $title = 'Buat Akun Baru';
             @endphp
 
             <div>
@@ -30,15 +30,16 @@
 
             <div class="mt-8">
                 <div class="mt-6">
-                    <x-filament-panels::form wire:submit="authenticate">
+                    <x-filament-panels::form wire:submit="register">
                         {{ $this->form }}
 
                         <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :alignment="$this->getFormActionsAlignment()" :full-width="$this->hasFullWidthFormActions()" />
                     </x-filament-panels::form>
+
                     <p class="font-bold mt-4 text-center text-sm text-gray-900 dark:text-white/90">
-                        Belum punya akun?
-                        <a href="{{ route('filament.admin.auth.register') }}" class="text-primary-600 hover:underline">
-                            Daftar sekarang
+                        Sudah punya akun?
+                        <a href="{{ route('filament.admin.auth.login') }}" class="text-primary-600 hover:underline">
+                            Masuk
                         </a>
                     </p>
                 </div>
