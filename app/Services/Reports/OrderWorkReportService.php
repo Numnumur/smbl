@@ -9,117 +9,104 @@ use Spatie\Browsershot\Browsershot;
 
 class OrderWorkReportService
 {
-    public static function generate(Carbon $startDate, Carbon $endDate): Collection
+    public static function generate(Carbon $startDate, Carbon $endDate): array
     {
-        $orders = Order::whereBetween('entry_date', [$startDate, $endDate])->get();
-        $ordersFinished = $orders->filter(fn($order) => $order->status !== 'Baru');
+        // Query dasar dengan status selesai
+        $finishedOrders = Order::whereBetween('entry_date', [$startDate, $endDate])
+            ->whereNotIn('status', ['Baru', 'Terkendala'])
+            ->get();
 
-        $ordersByPackage = $ordersFinished
-            ->groupBy(fn($order) => $order->order_package . '|' . $order->type)
-            ->map(function ($grouped) {
-                $first = $grouped->first();
-                [$package, $type] = explode('|', $first->order_package . '|' . $first->type);
+        // Total semua pesanan (termasuk yang belum selesai)
+        $totalPesananMasuk = Order::whereBetween('entry_date', [$startDate, $endDate])->count();
 
-                $jumlah_pesanan = $grouped->count();
-
-                if ($type === 'Karpet') {
-                    $detailUkuran = $grouped
-                        ->groupBy(fn($order) => (int) $order->length . ' cm x ' . (int) $order->width . ' cm')
-                        ->map(fn($g, $ukuran) => $ukuran . ' (' . $g->count() . ')')
-                        ->values()
-                        ->implode(', ');
-
-                    return [
-                        'package' => $package,
-                        'type' => $type,
-                        'jumlah_pesanan' => $jumlah_pesanan,
-                        'total_pengerjaan' => $detailUkuran,
-                        'unit' => '',
-                    ];
-                }
+        // Group by package dan type
+        $ordersByPackage = $finishedOrders->groupBy(fn($order) => $order->order_package . '|' . $order->type)
+            ->map(function ($group, $key) {
+                [$package, $type] = explode('|', $key);
 
                 return [
                     'package' => $package,
                     'type' => $type,
-                    'jumlah_pesanan' => $jumlah_pesanan,
-                    'total_pengerjaan' => $grouped->sum(fn($order) => self::getTotalPengerjaan($order)),
+                    'jumlah_pesanan' => $group->count(),
+                    'total_pengerjaan' => $type === 'Karpet'
+                        ? $group->count()
+                        : $group->sum(fn($order) => self::getTotalPengerjaan($order)),
                     'unit' => self::getUnit($type),
+                    'detail_ukuran' => $type === 'Karpet'
+                        ? $group->groupBy(fn($o) => (int)$o->length . ' cm x ' . (int)$o->width . ' cm')
+                        ->map(fn($g, $ukuran) => $ukuran . ' (' . $g->count() . ')')
+                        ->implode(', ')
+                        : ''
                 ];
             })
-            ->sortByDesc('jumlah_pesanan')
-            ->values();
+            ->values()
+            ->toArray();
 
-
-        $ordersByType = $ordersFinished
-            ->groupBy('type')
-            ->map(function ($grouped, $type) {
-                $jumlah_pesanan = $grouped->count();
-
-                if ($type === 'Karpet') {
-                    $detailUkuran = $grouped
-                        ->groupBy(fn($order) => (int) $order->length . ' cm x ' . (int) $order->width . ' cm')
-                        ->map(fn($g, $ukuran) => $ukuran . ' (' . $g->count() . ')')
-                        ->values()
-                        ->implode(', ');
-
-                    return [
-                        'type' => $type,
-                        'jumlah_pesanan' => $jumlah_pesanan,
-                        'total_pengerjaan' => $detailUkuran,
-                        'unit' => '',
-                    ];
-                }
-
+        // Group by type saja
+        $ordersByType = $finishedOrders->groupBy('type')
+            ->map(function ($group, $type) {
                 return [
                     'type' => $type,
-                    'jumlah_pesanan' => $jumlah_pesanan,
-                    'total_pengerjaan' => $grouped->sum(fn($order) => self::getTotalPengerjaan($order)),
+                    'jumlah_pesanan' => $group->count(),
+                    'total_pengerjaan' => $type === 'Karpet'
+                        ? $group->count()
+                        : $group->sum(fn($order) => self::getTotalPengerjaan($order)),
                     'unit' => self::getUnit($type),
+                    'detail_ukuran' => $type === 'Karpet'
+                        ? $group->groupBy(fn($o) => (int)$o->length . ' cm x ' . (int)$o->width . ' cm')
+                        ->map(fn($g, $ukuran) => $ukuran . ' (' . $g->count() . ')')
+                        ->implode(', ')
+                        : ''
                 ];
             })
-            ->sortByDesc('jumlah_pesanan')
-            ->values();
+            ->values()
+            ->toArray();
 
-
-        $ordersKarpetByUkuran = $ordersFinished
-            ->where('type', 'Karpet')
-            ->groupBy(fn($order) => (int) $order->length . ' cm x ' . (int) $order->width . ' cm')
-            ->map(function ($grouped, $ukuran) {
-                return [
-                    'ukuran' => $ukuran,
-                    'jumlah' => $grouped->count(),
-                ];
-            })
-            ->sortByDesc('jumlah')
-            ->values();
-
-
-        return collect([
-            'totalPesananMasuk' => $orders->count(),
-            'totalPesananSelesai' => $ordersFinished->count(),
+        return [
+            'totalPesananMasuk' => $totalPesananMasuk,
+            'totalPesananSelesai' => $finishedOrders->count(),
             'ordersByPackage' => $ordersByPackage,
             'ordersByType' => $ordersByType,
-            'ordersKarpetByUkuran' => $ordersKarpetByUkuran,
+        ];
+    }
+
+    public static function getSummary(Carbon $startDate, Carbon $endDate): Collection
+    {
+        $data = self::generate($startDate, $endDate);
+
+        $totalPengerjaanKiloan = $data['ordersByType']->where('type', 'Kiloan')->sum('total_pengerjaan');
+        $totalPengerjaanLembaran = $data['ordersByType']->where('type', 'Lembaran')->sum('total_pengerjaan');
+        $totalPengerjaanSatuan = $data['ordersByType']->where('type', 'Satuan')->sum('total_pengerjaan');
+
+        $totalPengerjaanKarpet = $data['ordersByType']->where('type', 'Karpet')->sum('jumlah_pesanan');
+
+        return collect([
+            'totalPesananMasuk' => $data['totalPesananMasuk'],
+            'totalPesananSelesai' => $data['totalPesananSelesai'],
+            'totalOrdersKarpet' => $data['ordersByType']->where('type', 'Karpet')->sum('jumlah_pesanan'),
+            'totalOrdersKiloan' => $data['ordersByType']->where('type', 'Kiloan')->sum('jumlah_pesanan'),
+            'totalOrdersLembaran' => $data['ordersByType']->where('type', 'Lembaran')->sum('jumlah_pesanan'),
+            'totalOrdersSatuan' => $data['ordersByType']->where('type', 'Satuan')->sum('jumlah_pesanan'),
+            'totalPengerjaanKarpet' => $totalPengerjaanKarpet,
+            'totalPengerjaanKiloan' => $totalPengerjaanKiloan,
+            'totalPengerjaanLembaran' => $totalPengerjaanLembaran,
+            'totalPengerjaanSatuan' => $totalPengerjaanSatuan,
         ]);
     }
 
     public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate): string
     {
-        $days = (int) $startDate->diffInDays($endDate) + 1;
-        $totalDays = $days;
-
-        $data = self::generate($startDate, $endDate);
+        $report = self::generate($startDate, $endDate);
 
         $html = view('pdf.order-work-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => $totalDays,
-            'totalPesananMasuk' => $data['totalPesananMasuk'],
-            'totalPesananSelesai' => $data['totalPesananSelesai'],
-            'ordersByPackage' => $data['ordersByPackage'],
-            'ordersByType' => $data['ordersByType'],
-            'ordersKarpetByUkuran' => $data['ordersKarpetByUkuran'],
+            'totalDays' => $startDate->diffInDays($endDate) + 1,
+            'totalPesananMasuk' => $report['totalPesananMasuk'],
+            'totalPesananSelesai' => $report['totalPesananSelesai'],
+            'ordersByPackage' => $report['ordersByPackage'],
+            'ordersByType' => $report['ordersByType'],
         ])->render();
 
         return Browsershot::html($html)->pdf();
