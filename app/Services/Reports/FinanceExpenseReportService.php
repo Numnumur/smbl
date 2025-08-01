@@ -9,6 +9,11 @@ use Spatie\Browsershot\Browsershot;
 
 class FinanceExpenseReportService
 {
+    /**
+     * Generate a PDF report for finance expenses.
+     * * @param array $data Contains 'name', 'start_date', and 'end_date'.
+     * @return string The PDF content.
+     */
     public static function generate(array $data)
     {
         $startDate = Carbon::parse($data['start_date'])->startOfDay();
@@ -28,7 +33,7 @@ class FinanceExpenseReportService
         )->map(fn($group) => $group->sum('price'));
 
         $topDay = $groupedByDay->sortDesc()->keys()->first();
-        $topDayAmount = $groupedByDay->max();
+        $topDayAmount = $groupedByDay->max() ?? 0;
 
         $expensesByNeeds = Expense::select('needs', DB::raw('COUNT(*) as jumlah_transaksi'), DB::raw('SUM(price) as total_pengeluaran'))
             ->whereBetween('date', [$startDate, $endDate])
