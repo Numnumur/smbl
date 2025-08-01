@@ -102,12 +102,14 @@
     </table>
 
     <div class="section">
+        <h2>Daftar Pelanggan Tetap</h2>
         <table>
             <thead>
                 <tr>
                     <th class="center">No</th>
                     <th>Nama</th>
-                    <th class="center">Jumlah Pesanan</th>
+                    <th>Nomor WhatsApp</th>
+                    <th>Alamat</th>
                 </tr>
             </thead>
             <tbody>
@@ -115,14 +117,14 @@
                     <tr>
                         <td class="center">{{ $index + 1 }}</td>
                         <td>{{ $data['name'] }}</td>
-                        <td class="center">{{ $data['orders'] }}</td>
+                        <td>{{ $data['whatsapp'] }}</td>
+                        <td>{{ $data['address'] }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td class="center" colspan="3">Tidak ada data.</td>
+                        <td class="center" colspan="4">Tidak ada data.</td>
                     </tr>
                 @endforelse
-
             </tbody>
         </table>
     </div>
