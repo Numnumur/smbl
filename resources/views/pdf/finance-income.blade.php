@@ -98,37 +98,27 @@
         <tr>
             <td><strong>Total Pemasukan</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td><strong>Total Pengeluaran</strong></td>
-            <td>:</td>
-            <td>Rp. {{ number_format($totalExpense, 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td><strong>Laba Bersih</strong></td>
-            <td>:</td>
-            <td>Rp. {{ number_format($netProfit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($total, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Rata-rata Per Hari</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($averagePerDay, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($averagePerDay, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Rata-rata Per Pesanan</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($averagePerOrder, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($averagePerOrder, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Hari Tertinggi</strong></td>
             <td>:</td>
-            <td>{{ $topDay ? $topDay . ' (Rp. ' . number_format($topDayAmount, 0, ',', '.') . ')' : '-' }}</td>
+            <td>{{ $topDay ? $topDay . ' (Rp ' . number_format($topDayAmount, 0, ',', '.') . ')' : '-' }}</td>
         </tr>
         <tr>
             <td><strong>Hari Terendah</strong></td>
             <td>:</td>
-            <td>{{ $bottomDay ? $bottomDay . ' (Rp. ' . number_format($bottomDayAmount, 0, ',', '.') . ')' : '-' }}
+            <td>{{ $bottomDay ? $bottomDay . ' (Rp ' . number_format($bottomDayAmount, 0, ',', '.') . ')' : '-' }}
             </td>
         </tr>
     </table>
@@ -153,7 +143,7 @@
                         <td class="center">{{ $index + 1 }}</td>
                         <td>{{ $data->order_package ?? '-' }}</td>
                         <td class="center">{{ $data->jumlah_pesanan }}</td>
-                        <td>Rp. {{ number_format($data->total_pemasukan, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -181,7 +171,7 @@
                         <td class="center">{{ $index + 1 }}</td>
                         <td>{{ $data->type ?? '-' }}</td>
                         <td class="center">{{ $data->jumlah_pesanan }}</td>
-                        <td>Rp. {{ number_format($data->total_pemasukan, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>

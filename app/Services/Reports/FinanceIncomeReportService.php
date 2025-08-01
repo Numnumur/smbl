@@ -3,7 +3,6 @@
 namespace App\Services\Reports;
 
 use App\Models\Order;
-use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Spatie\Browsershot\Browsershot;
@@ -23,22 +22,18 @@ class FinanceIncomeReportService
         $days = (int) $startDate->diffInDays($endDate) + 1;
         $totalDays = $days;
 
-        $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
-        $totalExpense = $expenses->sum('price');
-        $netProfit = $total - $totalExpense;
-
         $averagePerDay = $days > 0 ? $total / $days : 0;
         $averagePerOrder = $orders->count() > 0 ? $total / $orders->count() : 0;
 
         $groupedByDay = $orders->groupBy(
-            fn($order) => Carbon::parse($order->entry_date)->format('Y-m-d')
+            fn($order) => Carbon::parse($order->exit_date)->format('Y-m-d')
         )->map(fn($group) => $group->sum('total_price'));
 
         $topDay = $groupedByDay->sortDesc()->keys()->first();
-        $topDayAmount = $groupedByDay->max();
+        $topDayAmount = $groupedByDay->max() ?? 0;
 
         $bottomDay = $groupedByDay->sort()->keys()->first();
-        $bottomDayAmount = $groupedByDay->min();
+        $bottomDayAmount = $groupedByDay->min() ?? 0;
 
         $ordersByPackage = Order::select(
             'order_package',
@@ -68,8 +63,6 @@ class FinanceIncomeReportService
             'endDate' => $endDate->translatedFormat('j F Y'),
             'totalDays' => $totalDays,
             'total' => $total,
-            'totalExpense' => $totalExpense,
-            'netProfit' => $netProfit,
             'averagePerDay' => $averagePerDay,
             'averagePerOrder' => $averagePerOrder,
             'topDay' => $topDay ? Carbon::parse($topDay)->translatedFormat('j F Y') : '-',

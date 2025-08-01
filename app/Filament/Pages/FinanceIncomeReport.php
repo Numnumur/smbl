@@ -47,7 +47,7 @@ class FinanceIncomeReport extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Filter Laporan')
+                Section::make('Rentang Waktu Data')
                     ->schema([
                         DatePicker::make('start_date')
                             ->label('Dari Tanggal')
@@ -60,8 +60,10 @@ class FinanceIncomeReport extends Page implements HasForms
                             ->native(false)
                             ->required()
                             ->afterOrEqual('start_date')
+                            ->minDate(fn(callable $get) => $get('start_date'))
                             ->reactive()
-                            ->afterStateUpdated(fn() => $this->generateReport()),
+                            ->afterStateUpdated(fn() => $this->generateReport())
+                            ->helperText('Tidak bisa lebih kecil dari tanggal awal'),
                     ])->columns(2)
             ])
             ->statePath('data');
@@ -84,10 +86,6 @@ class FinanceIncomeReport extends Page implements HasForms
 
         $total = $orders->sum('total_price');
         $days = (int) $startDate->diffInDays($endDate) + 1;
-
-        $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
-        $totalExpense = $expenses->sum('price');
-        $netProfit = $total - $totalExpense;
 
         $averagePerDay = $days > 0 ? $total / $days : 0;
         $averagePerOrder = $orders->count() > 0 ? $total / $orders->count() : 0;
@@ -129,8 +127,6 @@ class FinanceIncomeReport extends Page implements HasForms
             'endDate' => $endDate->translatedFormat('j F Y'),
             'totalDays' => $days,
             'total' => $total,
-            'totalExpense' => $totalExpense,
-            'netProfit' => $netProfit,
             'averagePerDay' => $averagePerDay,
             'averagePerOrder' => $averagePerOrder,
             'topDay' => $topDay ? Carbon::parse($topDay)->translatedFormat('j F Y') : '-',
@@ -152,17 +148,14 @@ class FinanceIncomeReport extends Page implements HasForms
         return [
             'period' => $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)',
             'total' => 'Rp ' . number_format($this->reportData['total'], 0, ',', '.'),
-            'totalExpense' => 'Rp ' . number_format($this->reportData['totalExpense'], 0, ',', '.'),
-            'netProfit' => 'Rp ' . number_format($this->reportData['netProfit'], 0, ',', '.'),
-            'netProfitRaw' => $this->reportData['netProfit'],
             'totalOrders' => number_format($this->reportData['totalOrders']),
             'averagePerDay' => 'Rp ' . number_format($this->reportData['averagePerDay'], 0, ',', '.'),
             'averagePerOrder' => 'Rp ' . number_format($this->reportData['averagePerOrder'], 0, ',', '.'),
             'topDay' => $this->reportData['topDay'] !== '-'
-                ? $this->reportData['topDay'] . ' (Rp. ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
+                ? $this->reportData['topDay'] . ' (Rp ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
                 : '-',
             'bottomDay' => $this->reportData['bottomDay'] !== '-'
-                ? $this->reportData['bottomDay'] . ' (Rp. ' . number_format($this->reportData['bottomDayAmount'], 0, ',', '.') . ')'
+                ? $this->reportData['bottomDay'] . ' (Rp ' . number_format($this->reportData['bottomDayAmount'], 0, ',', '.') . ')'
                 : '-',
         ];
     }
@@ -217,29 +210,6 @@ class FinanceIncomeReport extends Page implements HasForms
                                 ->maxLength(100)
                                 ->columnSpanFull(),
                         ]),
-
-                    Section::make('Detail Laporan')
-                        ->description('Informasi periode dan data yang akan dicetak')
-                        ->schema([
-                            TextInput::make('periode_info')
-                                ->label('Periode')
-                                ->disabled()
-                                ->default(function () {
-                                    if ($this->reportData) {
-                                        return $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)';
-                                    }
-                                    return '-';
-                                }),
-                            TextInput::make('total_pemasukan_info')
-                                ->label('Total Pemasukan')
-                                ->disabled()
-                                ->default(function () {
-                                    if ($this->reportData) {
-                                        return 'Rp ' . number_format($this->reportData['total'], 0, ',', '.');
-                                    }
-                                    return '-';
-                                }),
-                        ])->columns(2),
                 ])
                 ->modalSubmitActionLabel('Cetak PDF')
                 ->modalCancelActionLabel('Batal')

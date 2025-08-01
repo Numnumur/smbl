@@ -41,20 +41,6 @@
                     </div>
 
                     <div class="space-y-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pengeluaran</dt>
-                        <dd class="text-sm font-semibold text-red-600 dark:text-red-400">{{ $summary['totalExpense'] }}
-                        </dd>
-                    </div>
-
-                    <div class="space-y-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Laba Bersih</dt>
-                        <dd
-                            class="text-sm font-semibold {{ $summary['netProfitRaw'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                            {{ $summary['netProfit'] }}
-                        </dd>
-                    </div>
-
-                    <div class="space-y-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pesanan</dt>
                         <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['totalOrders'] }}</dd>
                     </div>
@@ -115,7 +101,7 @@
                             </thead>
                             <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse($this->getPackageData() as $index => $data)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <tr>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $index + 1 }}
@@ -183,7 +169,7 @@
                             </thead>
                             <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse($this->getTypeData() as $index => $data)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <tr>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $index + 1 }}
