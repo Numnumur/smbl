@@ -2,10 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Customer;
 use App\Services\Reports\CustomerReportService;
-// use Carbon\Carbon;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use Filament\Pages\Page;
 use Filament\Pages\Concerns\InteractsWithHeaderActions;
 use Filament\Forms\Components\DatePicker;
@@ -24,7 +22,7 @@ class CustomerReport extends Page implements HasForms
     use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Laporan Pesanan Pelanggan';
+    protected static ?string $navigationLabel = 'Laporan Pelanggan';
     protected static ?string $title = 'Laporan Pesanan Pelanggan';
     protected static string $view = 'filament.pages.customer-report';
     protected static ?string $navigationGroup = 'Laporan';
@@ -76,22 +74,22 @@ class CustomerReport extends Page implements HasForms
             return;
         }
 
-        $startDate = Carbon::parse($data['start_date']);
-        $endDate = Carbon::parse($data['end_date']);
+        $startDate = Carbon::parse($data['start_date'])->startOfDay();
+        $endDate = Carbon::parse($data['end_date'])->endOfDay();
 
         $customers = CustomerReportService::generate($startDate, $endDate);
+        $days = (int) $startDate->diffInDays($endDate) + 1;
 
+        // Calculate statistics
         $totalCustomers = $customers->count();
         $totalOrders = $customers->sum('total_orders');
         $totalIncome = $customers->sum('total_income');
-        $averageOrdersPerCustomer = $totalCustomers > 0 ? $totalOrders / $totalCustomers : 0;
-        $averageIncomePerCustomer = $totalCustomers > 0 ? $totalIncome / $totalCustomers : 0;
+        $averageOrdersPerCustomer = $totalCustomers > 0 ? round($totalOrders / $totalCustomers, 2) : 0;
+        $averageIncomePerCustomer = $totalCustomers > 0 ? round($totalIncome / $totalCustomers, 2) : 0;
 
-        // Top customers by orders and income
+        // Top customer by orders and income
         $topCustomerByOrders = $customers->sortByDesc('total_orders')->first();
         $topCustomerByIncome = $customers->sortByDesc('total_income')->first();
-
-        $days = (int) $startDate->diffInDays($endDate) + 1;
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
@@ -160,12 +158,12 @@ class CustomerReport extends Page implements HasForms
                             TextInput::make('report_name')
                                 ->label('Nama Laporan')
                                 ->required()
-                                ->placeholder('Contoh: Laporan Pesanan Pelanggan Januari 2025')
+                                ->placeholder('Contoh: Laporan Pelanggan Januari 2025')
                                 ->default(function () {
                                     if ($this->reportData) {
-                                        return 'Laporan Pesanan Pelanggan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
+                                        return 'Laporan Pelanggan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
                                     }
-                                    return 'Laporan Pesanan Pelanggan';
+                                    return 'Laporan Pelanggan';
                                 })
                                 ->helperText('Nama ini akan muncul sebagai judul di laporan PDF')
                                 ->maxLength(100)
@@ -185,14 +183,10 @@ class CustomerReport extends Page implements HasForms
                     }
 
                     try {
-                        $startDate = Carbon::parse($this->data['start_date']);
-                        $endDate = Carbon::parse($this->data['end_date']);
+                        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
 
-                        $pdf = CustomerReportService::generatePdf(
-                            $data['report_name'],
-                            $startDate,
-                            $endDate
-                        );
+                        $pdf = CustomerReportService::generatePdf($data['report_name'], $startDate, $endDate);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')
