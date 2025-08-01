@@ -83,22 +83,22 @@
         <tr>
             <td><strong>Total Pengeluaran</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($total, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Rata-rata Per Hari</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($averagePerDay, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($averagePerDay, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Rata-rata Per Transaksi</strong></td>
             <td>:</td>
-            <td>Rp. {{ number_format($averagePerTransaction, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($averagePerTransaction, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Hari Tertinggi</strong></td>
             <td>:</td>
-            <td>{{ $topDay ? $topDay . ' (Rp. ' . number_format($topDayAmount, 0, ',', '.') . ')' : '-' }}</td>
+            <td>{{ $topDay ? $topDay . ' (Rp ' . number_format($topDayAmount, 0, ',', '.') . ')' : '-' }}</td>
         </tr>
     </table>
 
@@ -119,7 +119,7 @@
                         <td class="center">{{ $index + 1 }}</td>
                         <td>{{ $data->needs ?? '-' }}</td>
                         <td class="center">{{ $data->jumlah_transaksi }}</td>
-                        <td>Rp. {{ number_format($data->total_pengeluaran, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($data->total_pengeluaran, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>

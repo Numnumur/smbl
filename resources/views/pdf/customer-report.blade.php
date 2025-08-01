@@ -3,26 +3,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Pesanan Pelanggan</title>
+    <title>{{ $name }}</title>
     <style>
         @page {
             margin: 40px;
-            /* Tambahan space untuk header di setiap halaman */
         }
 
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
             margin: 0;
-            /* Reset margin karena sudah diatur di @page */
+            color: #000;
+            /* Memastikan semua teks berwarna hitam */
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
             font-size: 20px;
             margin-top: 0;
-            /* Reset margin top untuk h1 */
         }
 
         h2 {
@@ -32,25 +31,36 @@
             font-size: 16px;
         }
 
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
         .statistic-table {
             border-collapse: collapse;
             width: auto;
             font-size: 13px;
             border: none;
             margin-bottom: 30px;
+            /* Menghapus margin auto untuk membuat rata kiri */
         }
 
         .statistic-table td {
-            padding: 4px 6px;
+            padding: 2px 6px;
             vertical-align: top;
             white-space: nowrap;
             border: none;
         }
 
-        .statistic-table td:nth-child(1),
-        .statistic-table td:nth-child(2) {
+        .statistic-table td:nth-child(1) {
             width: 1px;
             white-space: nowrap;
+        }
+
+        .statistic-table td:nth-child(2) {
+            width: 1px;
         }
 
         table {
@@ -59,7 +69,6 @@
             margin-top: 30px;
         }
 
-        /* Style untuk tabel utama agar memiliki space yang konsisten */
         .main-table {
             width: 100%;
             border-collapse: collapse;
@@ -78,7 +87,6 @@
             text-align: center;
         }
 
-        /* Pastikan header tabel berulang di setiap halaman */
         thead {
             display: table-header-group;
         }
@@ -87,7 +95,6 @@
             display: table-row-group;
         }
 
-        /* Hindari page break di dalam baris tabel */
         tr {
             page-break-inside: avoid;
         }
@@ -119,22 +126,55 @@
         <tr>
             <td><strong>Total Pelanggan</strong></td>
             <td>:</td>
-            <td>{{ $customers->count() }}</td>
+            <td>{{ number_format($totalCustomers) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Pesanan</strong></td>
+            <td>:</td>
+            <td>{{ number_format($totalOrders) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Pemasukan</strong></td>
+            <td>:</td>
+            <td>Rp {{ number_format($totalIncome, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Rata-rata Pesanan/Pelanggan</strong></td>
+            <td>:</td>
+            <td>{{ number_format($averageOrdersPerCustomer, 1) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Rata-rata Pemasukan/Pelanggan</strong></td>
+            <td>:</td>
+            <td>Rp {{ number_format($averageIncomePerCustomer, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Pelanggan Terbanyak Pesanan</strong></td>
+            <td>:</td>
+            <td>{{ $topCustomerByOrders['name'] ?? '-' }}
+                ({{ number_format($topCustomerByOrders['total_orders'] ?? 0) }} pesanan)</td>
+        </tr>
+        <tr>
+            <td><strong>Pelanggan Terbesar Pemasukan</strong></td>
+            <td>:</td>
+            <td>{{ $topCustomerByIncome['name'] ?? '-' }} (Rp
+                {{ number_format($topCustomerByIncome['total_income'] ?? 0, 0, ',', '.') }})</td>
         </tr>
     </table>
 
+    <h2>Detail Pesanan Pelanggan</h2>
     <table class="main-table">
         <thead>
             <tr>
-                <th class="center">No</th>
-                <th class="center">Nama Pelanggan</th>
-                <th class="center">Pesanan</th>
-                <th class="center">Pemasukan</th>
-                <th class="center">Paket Pesanan</th>
+                <th class="center" style="width: 5%">No</th>
+                <th class="center" style="width: 20%">Nama Pelanggan</th>
+                <th class="center" style="width: 25%">Informasi Pesanan</th>
+                <th class="center" style="width: 25%">Pemasukan</th>
+                <th class="center" style="width: 25%">Paket Pesanan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($customers as $index => $customer)
+            @forelse($customers as $index => $customer)
                 <tr>
                     <td class="center">{{ $loop->iteration }}</td>
                     <td class="left">{{ $customer['name'] }}</td>
@@ -144,16 +184,20 @@
                         <small>{{ $customer['last_order_diff'] }}</small>
                     </td>
                     <td class="left">
-                        Total: Rp. {{ number_format($customer['total_income'], 0, ',', '.') }}<br>
-                        Rata-rata Per Pesanan: Rp. {{ number_format($customer['average_income'], 0, ',', '.') }}
+                        Total: Rp {{ number_format($customer['total_income'], 0, ',', '.') }}<br>
+                        Rata-rata Per Pesanan: Rp {{ number_format($customer['average_income'], 0, ',', '.') }}
                     </td>
                     <td class="left">
                         @foreach ($customer['packages'] as $package => $count)
-                            - {{ $package }} ({{ $count }})<br>
+                            - {{ $package ?: 'Tidak ada paket' }} ({{ $count }})<br>
                         @endforeach
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="center">Tidak ada data pelanggan untuk rentang tanggal ini.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

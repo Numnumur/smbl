@@ -9,6 +9,12 @@ use Spatie\Browsershot\Browsershot;
 
 class RegularCustomerReportService
 {
+    /**
+     * Generate a PDF report for regular customers based on order criteria.
+     *
+     * @param array $data Contains 'name', 'start_date', 'end_date', and 'kriteria_minimum_pesanan'.
+     * @return string The PDF content.
+     */
     public static function generate(array $data)
     {
         $startDate = Carbon::parse($data['start_date'])->startOfDay();
@@ -34,10 +40,12 @@ class RegularCustomerReportService
         $customers = $grouped->map(function ($orders) {
             $first = $orders->first();
             $user = $first->customer?->user;
+            $customer = $first->customer;
 
             return [
                 'name' => $user?->name ?? '-',
-                'orders' => $orders->count(),
+                'whatsapp' => $customer->whatsapp ? '+' . $customer->whatsapp : '-',
+                'address' => $customer->address ?? '-',
             ];
         })->values();
 
