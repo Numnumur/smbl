@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Services\Reports\OrderWorkReportService;
+use Carbon\Carbon;
 use Filament\Pages\Page;
 use Filament\Pages\Concerns\InteractsWithHeaderActions;
 use Filament\Forms\Components\DatePicker;
@@ -14,22 +15,20 @@ use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Carbon;
 
 class OrderWorkReport extends Page implements HasForms
 {
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
-    protected static ?string $navigationLabel = 'Laporan Pengerjaan Pesanan';
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static ?string $navigationLabel = 'Laporan Pengerjaan';
     protected static ?string $title = 'Laporan Pengerjaan Pesanan';
     protected static string $view = 'filament.pages.order-work-report';
     protected static ?string $navigationGroup = 'Laporan';
 
     public ?array $data = [];
     public $reportData = null;
-    public $summaryData = null;
 
     public function mount(): void
     {
@@ -75,42 +74,90 @@ class OrderWorkReport extends Page implements HasForms
             return;
         }
 
-        $startDate = Carbon::parse($data['start_date']);
-        $endDate = Carbon::parse($data['end_date']);
+        $startDate = Carbon::parse($data['start_date'])->startOfDay();
+        $endDate = Carbon::parse($data['end_date'])->endOfDay();
 
-        $report = OrderWorkReportService::generate($startDate, $endDate);
+        $reportData = OrderWorkReportService::generate($startDate, $endDate);
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+
+        // Calculate additional statistics
+        $totalPesananMasuk = $reportData['totalPesananMasuk'];
+        $totalPesananSelesai = $reportData['totalPesananSelesai'];
+        $totalPaketPesanan = $reportData['ordersByPackage']->count();
+        $totalTipePaketPesanan = $reportData['ordersByType']->count();
+
+        // Most popular package and type
+        $paketTerpopuler = $reportData['ordersByPackage']->first();
+        $tipeTerpopuler = $reportData['ordersByType']->first();
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => $startDate->diffInDays($endDate) + 1,
-            'ordersByPackage' => $report['ordersByPackage'],
-            'ordersByType' => $report['ordersByType'],
-        ];
-
-        // Hitung summary data dari ordersByType
-        $this->summaryData = [
-            'totalPesananMasuk' => $report['totalPesananMasuk'],
-            'totalPesananSelesai' => $report['totalPesananSelesai'],
-            'totalOrdersKiloan' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Kiloan')['jumlah_pesanan'] ?? 0,
-            'totalPengerjaanKiloan' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Kiloan')['total_pengerjaan'] ?? 0,
-            'totalOrdersLembaran' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Lembaran')['jumlah_pesanan'] ?? 0,
-            'totalPengerjaanLembaran' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Lembaran')['total_pengerjaan'] ?? 0,
-            'totalOrdersSatuan' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Satuan')['jumlah_pesanan'] ?? 0,
-            'totalPengerjaanSatuan' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Satuan')['total_pengerjaan'] ?? 0,
-            'totalOrdersKarpet' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Karpet')['jumlah_pesanan'] ?? 0,
-            'totalPengerjaanKarpet' => collect($report['ordersByType'])
-                ->firstWhere('type', 'Karpet')['jumlah_pesanan'] ?? 0, // Untuk karpet, jumlah pesanan = total pengerjaan
+            'totalDays' => $days,
+            'totalPesananMasuk' => $totalPesananMasuk,
+            'totalPesananSelesai' => $totalPesananSelesai,
+            'totalPaketPesanan' => $totalPaketPesanan,
+            'totalTipePaketPesanan' => $totalTipePaketPesanan,
+            'paketTerpopuler' => $paketTerpopuler,
+            'tipeTerpopuler' => $tipeTerpopuler,
+            'ordersByPackage' => $reportData['ordersByPackage'],
+            'ordersByType' => $reportData['ordersByType'],
+            'ordersKarpetByUkuran' => $reportData['ordersKarpetByUkuran'],
         ];
     }
 
+    public function getSummaryData()
+    {
+        if (!$this->reportData) {
+            return null;
+        }
+
+        return [
+            'period' => $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)',
+            'totalPesananMasuk' => number_format($this->reportData['totalPesananMasuk']),
+            'totalPesananSelesai' => number_format($this->reportData['totalPesananSelesai']),
+            'totalPaketPesanan' => number_format($this->reportData['totalPaketPesanan']),
+            'totalTipePaketPesanan' => number_format($this->reportData['totalTipePaketPesanan']),
+            'paketTerpopuler' => $this->reportData['paketTerpopuler']
+                ? $this->reportData['paketTerpopuler']['package'] . ' (' . $this->reportData['paketTerpopuler']['jumlah_pesanan'] . ' pesanan)'
+                : '-',
+            'tipeTerpopuler' => $this->reportData['tipeTerpopuler']
+                ? $this->reportData['tipeTerpopuler']['type'] . ' (' . $this->reportData['tipeTerpopuler']['jumlah_pesanan'] . ' pesanan)'
+                : '-',
+        ];
+    }
+
+    public function getPackageData()
+    {
+        if (!$this->reportData) {
+            return collect();
+        }
+
+        return $this->reportData['ordersByPackage'];
+    }
+
+    public function getTypeData()
+    {
+        if (!$this->reportData) {
+            return collect();
+        }
+
+        return $this->reportData['ordersByType'];
+    }
+
+    public function getKarpetData()
+    {
+        if (!$this->reportData) {
+            return collect();
+        }
+
+        return $this->reportData['ordersKarpetByUkuran'];
+    }
+
+    public function getTitle(): string
+    {
+        return 'Laporan Pengerjaan Pesanan';
+    }
 
     public function getHeaderActions(): array
     {
@@ -128,12 +175,12 @@ class OrderWorkReport extends Page implements HasForms
                             TextInput::make('report_name')
                                 ->label('Nama Laporan')
                                 ->required()
-                                ->placeholder('Contoh: Laporan Pengerjaan Pesanan Januari 2025')
+                                ->placeholder('Contoh: Laporan Pengerjaan Januari 2025')
                                 ->default(function () {
                                     if ($this->reportData) {
-                                        return 'Laporan Pengerjaan Pesanan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
+                                        return 'Laporan Pengerjaan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
                                     }
-                                    return 'Laporan Pengerjaan Pesanan';
+                                    return 'Laporan Pengerjaan';
                                 })
                                 ->helperText('Nama ini akan muncul sebagai judul di laporan PDF')
                                 ->maxLength(100)
@@ -153,14 +200,10 @@ class OrderWorkReport extends Page implements HasForms
                     }
 
                     try {
-                        $startDate = Carbon::parse($this->data['start_date']);
-                        $endDate = Carbon::parse($this->data['end_date']);
+                        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
 
-                        $pdf = OrderWorkReportService::generatePdf(
-                            $data['report_name'],
-                            $startDate,
-                            $endDate
-                        );
+                        $pdf = OrderWorkReportService::generatePdf($data['report_name'], $startDate, $endDate);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')
@@ -179,7 +222,7 @@ class OrderWorkReport extends Page implements HasForms
                             ->send();
                     }
                 })
-                ->disabled(fn() => !$this->reportData || $this->summaryData['totalPesananSelesai'] == 0)
+                ->disabled(fn() => !$this->reportData || $this->reportData['totalPesananMasuk'] == 0)
                 ->visible(fn() => $this->reportData !== null),
         ];
     }
