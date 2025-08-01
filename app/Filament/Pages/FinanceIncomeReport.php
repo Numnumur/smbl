@@ -4,20 +4,25 @@ namespace App\Filament\Pages;
 
 use App\Models\Order;
 use App\Models\Expense;
+use App\Services\Reports\FinanceIncomeReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
+use Filament\Pages\Concerns\InteractsWithHeaderActions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 
 class FinanceIncomeReport extends Page implements HasForms
 {
     use InteractsWithForms;
+    use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationLabel = 'Laporan Pemasukan';
@@ -183,5 +188,99 @@ class FinanceIncomeReport extends Page implements HasForms
     public function getTitle(): string
     {
         return 'Laporan Keuangan - Pemasukan';
+    }
+
+    public function getHeaderActions(): array
+    {
+        return [
+            Action::make('cetak_laporan')
+                ->label('Cetak Laporan PDF')
+                ->icon('heroicon-o-printer')
+                ->color('success')
+                ->modalHeading('Cetak Laporan PDF')
+                ->modalWidth('md')
+                ->form([
+                    Section::make('Informasi Laporan')
+                        ->description('Masukkan nama untuk laporan PDF yang akan dibuat')
+                        ->schema([
+                            TextInput::make('report_name')
+                                ->label('Nama Laporan')
+                                ->required()
+                                ->placeholder('Contoh: Laporan Pemasukan Januari 2025')
+                                ->default(function () {
+                                    if ($this->reportData) {
+                                        return 'Laporan Pemasukan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
+                                    }
+                                    return 'Laporan Pemasukan';
+                                })
+                                ->helperText('Nama ini akan muncul sebagai judul di laporan PDF')
+                                ->maxLength(100)
+                                ->columnSpanFull(),
+                        ]),
+
+                    Section::make('Detail Laporan')
+                        ->description('Informasi periode dan data yang akan dicetak')
+                        ->schema([
+                            TextInput::make('periode_info')
+                                ->label('Periode')
+                                ->disabled()
+                                ->default(function () {
+                                    if ($this->reportData) {
+                                        return $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)';
+                                    }
+                                    return '-';
+                                }),
+                            TextInput::make('total_pemasukan_info')
+                                ->label('Total Pemasukan')
+                                ->disabled()
+                                ->default(function () {
+                                    if ($this->reportData) {
+                                        return 'Rp ' . number_format($this->reportData['total'], 0, ',', '.');
+                                    }
+                                    return '-';
+                                }),
+                        ])->columns(2),
+                ])
+                ->modalSubmitActionLabel('Cetak PDF')
+                ->modalCancelActionLabel('Batal')
+                ->action(function (array $data) {
+                    if (!$this->reportData) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('Tidak ada data laporan. Silakan pilih rentang tanggal terlebih dahulu.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+
+                    try {
+                        $reportData = [
+                            'name' => $data['report_name'],
+                            'start_date' => $this->data['start_date'],
+                            'end_date' => $this->data['end_date'],
+                        ];
+
+                        $pdf = FinanceIncomeReportService::generate($reportData);
+
+                        Notification::make()
+                            ->title('PDF Berhasil Dibuat')
+                            ->body('Laporan PDF "' . $data['report_name'] . '" berhasil dibuat dan siap diunduh.')
+                            ->success()
+                            ->send();
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf;
+                        }, $data['report_name'] . '.pdf');
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('Terjadi kesalahan saat membuat PDF: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->disabled(fn() => !$this->reportData || empty($this->reportData['total']))
+                ->visible(fn() => $this->reportData !== null),
+        ];
     }
 }

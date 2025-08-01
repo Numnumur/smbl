@@ -15,7 +15,12 @@
                 <x-slot name="heading">
                     <div class="flex items-center gap-2">
                         <x-heroicon-o-chart-bar class="w-5 h-5" />
-                        Ringkasan Laporan
+                        <div>
+                            <div>Ringkasan Laporan</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                Gunakan tombol "Cetak Laporan PDF" di bagian atas untuk mengunduh laporan
+                            </div>
+                        </div>
                     </div>
                 </x-slot>
 
@@ -85,55 +90,62 @@
                     </div>
                 </x-slot>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    No
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Paket Pesanan
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Jumlah Pesanan
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Total Pemasukan
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($this->getPackageData() as $index => $data)
+                <div class="-mx-6 -mb-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $data->order_package ?? 'Tidak ada paket' }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                        {{ number_format($data->jumlah_pesanan) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
-                                    </td>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                                        No
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Paket Pesanan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                                        Jumlah Pesanan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
+                                        Total Pemasukan
+                                    </th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
-                                        Tidak ada data
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($this->getPackageData() as $index => $data)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $index + 1 }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $data->order_package ?? 'Tidak ada paket' }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                            {{ number_format($data->jumlah_pesanan) }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
+                                            Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4"
+                                            class="px-6 py-8 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
+                                            <div class="flex flex-col items-center">
+                                                <x-heroicon-o-inbox class="w-8 h-8 mb-2" />
+                                                Tidak ada data
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </x-filament::section>
 
@@ -146,55 +158,62 @@
                     </div>
                 </x-slot>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    No
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Tipe Pesanan
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Jumlah Pesanan
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Total Pemasukan
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($this->getTypeData() as $index => $data)
+                <div class="-mx-6 -mb-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $data->type ?? 'Tidak ada tipe' }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                        {{ number_format($data->jumlah_pesanan) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
-                                    </td>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                                        No
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Tipe Pesanan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                                        Jumlah Pesanan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
+                                        Total Pemasukan
+                                    </th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
-                                        Tidak ada data
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($this->getTypeData() as $index => $data)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $index + 1 }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $data->type ?? 'Tidak ada tipe' }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                            {{ number_format($data->jumlah_pesanan) }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
+                                            Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4"
+                                            class="px-6 py-8 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
+                                            <div class="flex flex-col items-center">
+                                                <x-heroicon-o-inbox class="w-8 h-8 mb-2" />
+                                                Tidak ada data
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </x-filament::section>
         @else
