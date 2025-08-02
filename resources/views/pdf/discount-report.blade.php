@@ -5,16 +5,21 @@
     <meta charset="UTF-8">
     <title>Laporan Pemberian Diskon</title>
     <style>
+        @page {
+            margin: 40px;
+        }
+
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
-            margin: 40px;
+            margin: 0;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 25px;
             font-size: 20px;
+            margin-top: 0;
         }
 
         h2 {
@@ -22,28 +27,6 @@
             margin-bottom: 15px;
             text-align: center;
             font-size: 16px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th,
-        td {
-            border: 1px solid #000;
-            padding: 6px;
-            font-size: 12px;
-        }
-
-        th {
-            background-color: #f0f0f0;
-            text-align: center;
-        }
-
-        .center {
-            text-align: center;
         }
 
         .statistic-table {
@@ -55,23 +38,98 @@
         }
 
         .statistic-table td {
-            padding: 2px 6px;
+            padding: 4px 6px;
             vertical-align: top;
             white-space: nowrap;
             border: none;
         }
 
-        .statistic-table td:nth-child(1) {
+        .statistic-table td:nth-child(1),
+        .statistic-table td:nth-child(2) {
             width: 1px;
             white-space: nowrap;
         }
 
-        .statistic-table td:nth-child(2) {
-            width: 1px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        td.center {
+            text-align: center;
+        }
+
+        td.left {
+            text-align: left;
         }
 
         .section {
             margin-top: 50px;
+            page-break-inside: avoid;
+        }
+
+        /* Prevent section header and table from breaking across pages */
+        .section-container {
+            page-break-inside: avoid;
+            margin-top: 50px;
+        }
+
+        /* If section is too long, allow break but keep header with at least some table content */
+        .section-with-table {
+            page-break-inside: avoid;
+        }
+
+        /* For very long tables, ensure at least header stays with first few rows */
+        .table-container {
+            page-break-inside: avoid;
+        }
+
+        /* Force page break before if needed */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Ensure header stays with table */
+        .keep-together {
+            page-break-inside: avoid;
+            margin-top: 50px;
+        }
+
+        /* For cases where content is too long, allow break but try to keep logical groups */
+        .table-section {
+            break-inside: avoid-page;
+            page-break-inside: avoid;
         }
     </style>
 </head>
@@ -89,7 +147,7 @@
         <tr>
             <td><strong>Total Penggunaan Diskon</strong></td>
             <td>:</td>
-            <td>{{ $totalUsage }} kali</td>
+            <td>{{ number_format($totalUsage) }} kali</td>
         </tr>
         <tr>
             <td><strong>Total Potongan Harga</strong></td>
@@ -98,9 +156,33 @@
         </tr>
     </table>
 
-    <div class="section">
+    <div class="keep-together">
+        <h2>Penggunaan Berdasarkan Jenis Diskon</h2>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="center">No</th>
+                    <th class="center">Nama Diskon</th>
+                    <th class="center">Jumlah Penggunaan</th>
+                    <th class="center">Total Potongan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($byDiscount as $data)
+                    <tr>
+                        <td class="center">{{ $loop->iteration }}</td>
+                        <td class="left">{{ $data['name'] }}</td>
+                        <td class="center">{{ number_format($data['count']) }} kali</td>
+                        <td class="center">Rp. {{ number_format($data['total_value'], 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div class="keep-together">
         <h2>Pemberian Diskon Berdasarkan Paket Pesanan</h2>
-        <table>
+        <table class="main-table">
             <thead>
                 <tr>
                     <th class="center">No</th>
@@ -113,32 +195,32 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($byPackage as $index => $item)
+                @foreach ($byPackage as $data)
                     <tr>
-                        <td class="center">{{ $index + 1 }}</td>
-                        <td>{{ $item['discount'] }}</td>
-                        <td class="center">{{ $item['type'] ?? '-' }}</td>
+                        <td class="center">{{ $loop->iteration }}</td>
+                        <td class="left">{{ $data['discount'] }}</td>
+                        <td class="center">{{ $data['type'] ?? '-' }}</td>
                         <td class="center">
-                            @if ($item['type'] === 'Persentase')
-                                {{ $item['value'] }}%
-                            @elseif ($item['type'] === 'Langsung')
-                                Rp. {{ number_format($item['value'], 0, ',', '.') }}
+                            @if ($data['type'] === 'Persentase')
+                                {{ number_format($data['value']) }}%
+                            @elseif ($data['type'] === 'Langsung')
+                                Rp. {{ number_format($data['value'], 0, ',', '.') }}
                             @else
                                 -
                             @endif
                         </td>
-                        <td>{{ $item['package'] }}</td>
-                        <td class="center">{{ $item['count'] }}</td>
-                        <td>Rp. {{ number_format($item['total_value'], 0, ',', '.') }}</td>
+                        <td class="left">{{ $data['package'] }}</td>
+                        <td class="center">{{ number_format($data['count']) }} kali</td>
+                        <td class="center">Rp. {{ number_format($data['total_value'], 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <div class="section">
-        <h2>Pemberian Diskon Berdasarkan Tipe Pada Paket Pesanan</h2>
-        <table>
+    <div class="keep-together">
+        <h2>Pemberian Diskon Berdasarkan Tipe Pesanan</h2>
+        <table class="main-table">
             <thead>
                 <tr>
                     <th class="center">No</th>
@@ -148,17 +230,18 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($byType as $index => $item)
+                @foreach ($byType as $data)
                     <tr>
-                        <td class="center">{{ $index + 1 }}</td>
-                        <td>{{ $item['type'] }}</td>
-                        <td class="center">{{ $item['count'] }}</td>
-                        <td>Rp. {{ number_format($item['total_value'], 0, ',', '.') }}</td>
+                        <td class="center">{{ $loop->iteration }}</td>
+                        <td class="center">{{ $data['type'] }}</td>
+                        <td class="center">{{ number_format($data['count']) }} kali</td>
+                        <td class="center">Rp. {{ number_format($data['total_value'], 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+
 </body>
 
 </html>
