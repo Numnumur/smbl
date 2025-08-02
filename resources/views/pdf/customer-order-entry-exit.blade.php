@@ -135,25 +135,10 @@
             page-break-inside: avoid;
         }
 
-        .keep-together {
-            page-break-inside: avoid;
-            margin-top: 15px;
-        }
-
         /* Ensure table header and at least first few rows stay together */
-        .table-with-header {
-            page-break-inside: avoid;
-        }
-
-        /* Force table to start on same page as title */
         .force-together {
             page-break-inside: avoid;
             page-break-before: avoid;
-        }
-
-        /* Allow breaking only after a certain number of rows if needed */
-        .break-allowed {
-            page-break-inside: auto;
         }
 
         .date-list {
@@ -167,14 +152,12 @@
 
         /* Customer name styling */
         .customer-name {
-            font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         /* Number styling */
         .number-cell {
-            font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
         }
     </style>
 </head>

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Order;
 use App\Services\Reports\RegularCustomerReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
@@ -15,7 +14,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 
 class RegularCustomerReport extends Page implements HasForms
@@ -32,24 +30,17 @@ class RegularCustomerReport extends Page implements HasForms
     public ?array $data = [];
     public $reportData = null;
 
-    /**
-     * Mount the component and initialize the form with default values.
-     * Then, generate the initial report.
-     */
     public function mount(): void
     {
         $this->form->fill([
             'start_date' => now()->startOfMonth()->format('Y-m-d'),
             'end_date' => now()->endOfMonth()->format('Y-m-d'),
-            'kriteria_minimum_pesanan' => 3, // Nilai default untuk kriteria
+            'kriteria_minimum_pesanan' => 3,
         ]);
 
         $this->generateReport();
     }
 
-    /**
-     * Define the form schema for filtering the report data.
-     */
     public function form(Form $form): Form
     {
         return $form
@@ -77,15 +68,13 @@ class RegularCustomerReport extends Page implements HasForms
                             ->minValue(1)
                             ->required()
                             ->reactive()
-                            ->afterStateUpdated(fn() => $this->generateReport()),
+                            ->afterStateUpdated(fn() => $this->generateReport())
+                            ->helperText('Minimum pesanan untuk dianggap pelanggan tetap'),
                     ])->columns(3)
             ])
             ->statePath('data');
     }
 
-    /**
-     * Generate the report data based on the selected criteria.
-     */
     public function generateReport(): void
     {
         $data = $this->form->getState();
@@ -98,45 +87,19 @@ class RegularCustomerReport extends Page implements HasForms
         $endDate = Carbon::parse($data['end_date'])->endOfDay();
         $minOrders = $data['kriteria_minimum_pesanan'];
 
-        $orders = Order::with('customer.user')
-            ->where('status', 'Selesai')
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->get();
-
-        $totalCustomers = $orders->pluck('customer_id')->unique()->count();
-
-        $grouped = $orders->groupBy('customer_id')->filter(function ($orders) use ($minOrders) {
-            return $orders->count() >= $minOrders;
-        });
-
-        $qualifiedCustomers = $grouped->count();
-
-        $customers = $grouped->map(function ($orders) {
-            $first = $orders->first();
-            $user = $first->customer?->user;
-            $customer = $first->customer;
-
-            return [
-                'name' => $user?->name ?? '-',
-                'whatsapp' => $customer->whatsapp ? '+' . $customer->whatsapp : '-',
-                'address' => $customer->address ?? '-',
-            ];
-        })->values();
+        $reportData = RegularCustomerReportService::generate($startDate, $endDate, $minOrders);
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => (int) $startDate->diffInDays($endDate) + 1,
-            'totalCustomers' => $totalCustomers,
-            'qualifiedCustomers' => $qualifiedCustomers,
-            'minOrders' => $minOrders,
-            'customers' => $customers,
+            'totalDays' => $reportData['totalDays'],
+            'totalCustomers' => $reportData['totalCustomers'],
+            'qualifiedCustomers' => $reportData['qualifiedCustomers'],
+            'minOrders' => $reportData['minOrders'],
+            'customers' => $reportData['customers'],
         ];
     }
 
-    /**
-     * Prepare summary data for the Blade view.
-     */
     public function getSummaryData()
     {
         if (!$this->reportData) {
@@ -146,14 +109,11 @@ class RegularCustomerReport extends Page implements HasForms
         return [
             'period' => $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)',
             'totalCustomers' => number_format($this->reportData['totalCustomers']),
-            'minOrders' => number_format($this->reportData['minOrders']),
+            'minOrders' => number_format($this->reportData['minOrders']) . ' kali',
             'qualifiedCustomers' => number_format($this->reportData['qualifiedCustomers']),
         ];
     }
 
-    /**
-     * Get the list of regular customers for the Blade view.
-     */
     public function getCustomersData()
     {
         if (!$this->reportData) {
@@ -165,12 +125,9 @@ class RegularCustomerReport extends Page implements HasForms
 
     public function getTitle(): string
     {
-        return static::$title;
+        return 'Laporan Pelanggan Tetap';
     }
 
-    /**
-     * Define the header actions, including the "Cetak Laporan PDF" button.
-     */
     public function getHeaderActions(): array
     {
         return [
@@ -212,14 +169,11 @@ class RegularCustomerReport extends Page implements HasForms
                     }
 
                     try {
-                        $reportData = [
-                            'name' => $data['report_name'],
-                            'start_date' => $this->data['start_date'],
-                            'end_date' => $this->data['end_date'],
-                            'kriteria_minimum_pesanan' => $this->data['kriteria_minimum_pesanan'] ?? 3,
-                        ];
+                        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
+                        $minOrders = $this->data['kriteria_minimum_pesanan'];
 
-                        $pdf = RegularCustomerReportService::generate($reportData);
+                        $pdf = RegularCustomerReportService::generatePdf($data['report_name'], $startDate, $endDate, $minOrders);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')
@@ -238,7 +192,7 @@ class RegularCustomerReport extends Page implements HasForms
                             ->send();
                     }
                 })
-                ->disabled(fn() => !$this->reportData || $this->reportData['qualifiedCustomers'] === 0)
+                ->disabled(fn() => !$this->reportData || $this->reportData['qualifiedCustomers'] == 0)
                 ->visible(fn() => $this->reportData !== null),
         ];
     }
