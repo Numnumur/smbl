@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('pickup_deliveries', function (Blueprint $table) {
             $table->id();
-            $table->datetime('date_and_time')->nullable();
+            $table->date('date');
+            $table->time('time');
             $table->enum('type', ['Antar', 'Jemput', 'Antar dan Jemput']);
             $table->enum('status', ['Menunggu Konfirmasi', 'Sudah Dikonfirmasi', 'Selesai', 'Ditolak']);
             $table->text('customer_note')->nullable();

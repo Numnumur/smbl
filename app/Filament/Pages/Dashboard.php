@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use App\Models\PickupDelivery;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -17,7 +16,8 @@ use App\Services\Reports\OrderWorkReportService;
 use App\Services\Reports\DiscountReportService;
 use App\Services\Reports\CustomerOrderEntryExitReportService;
 use App\Services\Reports\PickupDeliveryReportService;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification;
@@ -43,7 +43,7 @@ class Dashboard extends BaseDashboard
             return [
                 Action::make('permintaan_antar_jemput')
                     ->label('Permintaan Antar Jemput')
-                    ->icon('heroicon-o-archive-box')
+                    ->icon('heroicon-o-truck')
                     ->color('primary')
                     ->modalHeading('Buat Permintaan Antar Jemput')
                     ->modalWidth('lg')
@@ -67,7 +67,7 @@ class Dashboard extends BaseDashboard
                                 ->description('Wajib Diisi')
                                 ->schema([
                                     Select::make('type')
-                                        ->label('Tipe Permintaan')
+                                        ->label('Jenis Permintaan')
                                         ->options([
                                             'Antar' => 'Antar',
                                             'Jemput' => 'Jemput',
@@ -76,16 +76,21 @@ class Dashboard extends BaseDashboard
                                         ->native(false)
                                         ->required()
                                         ->columnSpanFull(),
-                                    DateTimePicker::make('date_and_time')
-                                        ->label('Tanggal dan Waktu')
-                                        ->native(false)
-                                        ->seconds(false)
+                                    DatePicker::make('date')
+                                        ->label('Tanggal')
                                         ->required()
-                                        ->rules(['after_or_equal:now'])
+                                        ->minDate(now()->toDateString())
+                                        ->rules(['after_or_equal:today'])
                                         ->validationMessages([
-                                            'after_or_equal' => 'Tanggal dan waktu harus sama dengan atau setelah waktu sekarang.',
+                                            'after_or_equal' => 'Tanggal harus hari ini atau setelahnya.',
                                         ])
-                                        ->minDate(now()),
+                                        ->native(false),
+
+                                    TimePicker::make('time')
+                                        ->label('Waktu')
+                                        ->required()
+                                        ->seconds(false)
+                                        ->native(false),
                                 ])->columns();
 
                             $formComponents[] = Section::make()
@@ -113,9 +118,9 @@ class Dashboard extends BaseDashboard
                         PickupDelivery::create([
                             'type' => $data['type'],
                             'status' => 'Menunggu Konfirmasi',
-                            'date_and_time' => $data['date_and_time'],
+                            'date' => $data['date'],
+                            'time' => $data['time'],
                             'customer_note' => $data['customer_note'],
-                            'user_id' => $user->id,
                             'customer_id' => $customer?->id,
                         ]);
 
@@ -127,6 +132,8 @@ class Dashboard extends BaseDashboard
         if ($user->hasRole('super_admin')) {
             return [];
         }
+
+        return [];
     }
 
 

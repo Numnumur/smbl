@@ -51,12 +51,16 @@ class CustomerPickupDeliveryResource extends Resource
                     ->orderByDesc('created_at')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('date_and_time')
-                    ->label('Tanggal dan Waktu')
-                    ->formatStateUsing(fn($state) => $state ? \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i') : '-'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
+
+                Tables\Columns\TextColumn::make('time')
+                    ->label('Waktu')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('H:i')),
 
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe'),
+                    ->label('Jenis Permintaan'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -125,20 +129,23 @@ class CustomerPickupDeliveryResource extends Resource
 
                         $customer = $record->customer;
                         $customerName = $customer->user->name;
-                        $dateTime = Carbon::parse($record->date_and_time)->translatedFormat('l, d F Y H:i');
+                        $date = Carbon::parse($record->date)->locale('id')->translatedFormat('l, j F Y');
+                        $time = Carbon::parse($record->time)->format('H:i');
 
                         $message = implode("\n", [
                             "~~ Sinar Laundry ~~",
                             "",
                             "*Ada permintaan antar jemput baru* dari pelanggan berikut",
                             "Nama                         : {$customerName}",
-                            "Tipe Permintaan         : {$record->type}",
-                            "Tanggal dan Waktu    : {$dateTime}",
+                            "Jenis Permintaan         : {$record->type}",
+                            "Hari dan Tanggal       : {$date}",
+                            "Pada Jam                    : {$time}",
                             "Catatan Pelanggan     : {$record->customer_note}",
                             "Alamat                        : {$customer->address}",
                             "",
                             "Silahkan lakukan konfirmasi lewat web."
                         ]);
+
 
                         try {
                             $curl = curl_init();
