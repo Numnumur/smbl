@@ -154,6 +154,38 @@
             <td>:</td>
             <td>Rp. {{ number_format($totalDiscount, 0, ',', '.') }}</td>
         </tr>
+        <tr>
+            <td><strong>Total Jenis Diskon</strong></td>
+            <td>:</td>
+            <td>{{ number_format($totalDiscountTypes) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Paket Dengan Diskon</strong></td>
+            <td>:</td>
+            <td>{{ number_format($totalPackageDiscounts) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Diskon Terpopuler</strong></td>
+            <td>:</td>
+            <td>
+                @if ($diskonTerpopuler)
+                    {{ $diskonTerpopuler['name'] }} ({{ $diskonTerpopuler['count'] }} kali)
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Paket Terbanyak Diskon</strong></td>
+            <td>:</td>
+            <td>
+                @if ($paketTerbanyakDiskon)
+                    {{ $paketTerbanyakDiskon['package'] }} ({{ $paketTerbanyakDiskon['count'] }} kali)
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
     </table>
 
     <div class="keep-together">

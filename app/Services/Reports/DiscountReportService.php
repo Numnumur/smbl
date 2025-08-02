@@ -80,9 +80,15 @@ class DiscountReportService
 
         $data = self::generate($startDate, $endDate);
 
-        // Calculate additional statistics for PDF
+        // Calculate additional statistics for PDF (sama seperti di halaman report)
         $totalUsage = $data['totalUsage'];
         $totalDiscount = $data['totalDiscount'];
+        $totalDiscountTypes = $data['byDiscount']->count();
+        $totalPackageDiscounts = $data['byPackage']->count();
+
+        // Most popular discount and package
+        $diskonTerpopuler = $data['byDiscount']->first();
+        $paketTerbanyakDiskon = $data['byPackage']->first();
 
         $html = view('pdf.discount-report', [
             'name' => $name,
@@ -91,6 +97,10 @@ class DiscountReportService
             'totalDays' => $totalDays,
             'totalUsage' => $totalUsage,
             'totalDiscount' => $totalDiscount,
+            'totalDiscountTypes' => $totalDiscountTypes,
+            'totalPackageDiscounts' => $totalPackageDiscounts,
+            'diskonTerpopuler' => $diskonTerpopuler,
+            'paketTerbanyakDiskon' => $paketTerbanyakDiskon,
             'byDiscount' => $data['byDiscount'],
             'byPackage' => $data['byPackage'],
             'byType' => $data['byType'],
