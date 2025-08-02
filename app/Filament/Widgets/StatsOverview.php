@@ -28,7 +28,9 @@ class StatsOverview extends BaseWidget
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
 
-        $ordersThisMonth = Order::whereBetween('entry_date', [$startOfMonth, $endOfMonth])->get();
+        $ordersThisMonth = Order::where('status', 'Selesai')
+            ->whereBetween('exit_date', [$startOfMonth, $endOfMonth])
+            ->get();
 
         $customersThisMonth = $ordersThisMonth->pluck('customer_id')->unique()->count();
 
