@@ -11,7 +11,10 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $customerCount = Order::distinct('customer_id')->count('customer_id');
+        $customerCount = Order::whereMonth('entry_date', now()->month)
+            ->whereYear('entry_date', now()->year)
+            ->distinct('customer_id')
+            ->count('customer_id');
 
         $orderCount = Order::whereMonth('entry_date', now()->month)
             ->whereYear('entry_date', now()->year)

@@ -32,11 +32,17 @@
                 @endif
             </a>
 
-            <nav class="space-x-4">
+            <nav class="flex items-center space-x-4">
                 <a href="#tentang" class="text-gray-700 hover:text-blue-600">Tentang</a>
                 <a href="#layanan" class="text-gray-700 hover:text-blue-600">Layanan</a>
                 <a href="#paket" class="text-gray-700 hover:text-blue-600">Paket</a>
                 <a href="#kontak" class="text-gray-700 hover:text-blue-600">Kontak</a>
+
+                {{-- Tombol Masuk --}}
+                <a href="{{ route('filament.admin.auth.login') }}"
+                    class="ml-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                    Masuk
+                </a>
             </nav>
         </div>
     </header>
@@ -56,10 +62,19 @@
                 jemput<br>Kami siap memberikan pengerjaan yang terbaik untuk pesanan anda</p>
 
             {{-- Tombol --}}
-            <a href="https://wa.me/{{ $whatsapp }}" target="_blank"
-                class="inline-block mt-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow hover:bg-green-600 transition">
-                Hubungi via WhatsApp
-            </a>
+            <div class="flex flex-col items-center gap-4 mt-6">
+                <a href="https://wa.me/{{ $whatsapp }}" target="_blank"
+                    class="bg-green-500 text-white px-6 py-3 rounded-lg shadow hover:bg-green-600 transition">
+                    Hubungi via WhatsApp
+                </a>
+
+                <span class="text-gray-500 font-medium">atau</span>
+
+                <a href="{{ route('filament.admin.auth.register') }}"
+                    class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-600 transition">
+                    Daftar
+                </a>
+            </div>
 
             {{-- Statistik --}}
             <p class="mt-8 text-gray-600 text-sm">
