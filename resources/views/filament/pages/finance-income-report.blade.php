@@ -107,15 +107,15 @@
                                             {{ $index + 1 }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data->order_package ?? 'Tidak ada paket' }}
+                                            {{ $data['order_package'] }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                            {{ number_format($data->jumlah_pesanan) }}
+                                            {{ number_format($data['jumlah_pesanan']) }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
-                                            Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
+                                            Rp {{ number_format($data['total_pemasukan'], 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @empty
@@ -175,15 +175,15 @@
                                             {{ $index + 1 }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data->type ?? 'Tidak ada tipe' }}
+                                            {{ $data['type'] }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                            {{ number_format($data->jumlah_pesanan) }}
+                                            {{ number_format($data['jumlah_pesanan']) }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
-                                            Rp {{ number_format($data->total_pemasukan, 0, ',', '.') }}
+                                            Rp {{ number_format($data['total_pemasukan'], 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @empty

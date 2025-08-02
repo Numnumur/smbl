@@ -2,8 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Order;
-use App\Models\Expense;
 use App\Services\Reports\FinanceIncomeReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
@@ -16,7 +14,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 
 class FinanceIncomeReport extends Page implements HasForms
@@ -80,62 +77,22 @@ class FinanceIncomeReport extends Page implements HasForms
         $startDate = Carbon::parse($data['start_date'])->startOfDay();
         $endDate = Carbon::parse($data['end_date'])->endOfDay();
 
-        $orders = Order::where('status', 'Selesai')
-            ->whereBetween('exit_date', [$startDate, $endDate])
-            ->get();
-
-        $total = $orders->sum('total_price');
-        $days = (int) $startDate->diffInDays($endDate) + 1;
-
-        $averagePerDay = $days > 0 ? $total / $days : 0;
-        $averagePerOrder = $orders->count() > 0 ? $total / $orders->count() : 0;
-
-        $groupedByDay = $orders->groupBy(
-            fn($order) => Carbon::parse($order->exit_date)->format('Y-m-d')
-        )->map(fn($group) => $group->sum('total_price'));
-
-        $topDay = $groupedByDay->sortDesc()->keys()->first();
-        $topDayAmount = $groupedByDay->max() ?? 0;
-
-        $bottomDay = $groupedByDay->sort()->keys()->first();
-        $bottomDayAmount = $groupedByDay->min() ?? 0;
-
-        $ordersByPackage = Order::select(
-            'order_package',
-            DB::raw('COUNT(*) as jumlah_pesanan'),
-            DB::raw('SUM(total_price) as total_pemasukan')
-        )
-            ->where('status', 'Selesai')
-            ->whereBetween('exit_date', [$startDate, $endDate])
-            ->groupBy('order_package')
-            ->orderByDesc('total_pemasukan')
-            ->get();
-
-        $ordersByType = Order::select(
-            'type',
-            DB::raw('COUNT(*) as jumlah_pesanan'),
-            DB::raw('SUM(total_price) as total_pemasukan')
-        )
-            ->where('status', 'Selesai')
-            ->whereBetween('exit_date', [$startDate, $endDate])
-            ->groupBy('type')
-            ->orderByDesc('total_pemasukan')
-            ->get();
+        $reportData = FinanceIncomeReportService::generate($startDate, $endDate);
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => $days,
-            'total' => $total,
-            'averagePerDay' => $averagePerDay,
-            'averagePerOrder' => $averagePerOrder,
-            'topDay' => $topDay ? Carbon::parse($topDay)->translatedFormat('j F Y') : '-',
-            'topDayAmount' => $topDayAmount,
-            'bottomDay' => $bottomDay ? Carbon::parse($bottomDay)->translatedFormat('j F Y') : '-',
-            'bottomDayAmount' => $bottomDayAmount,
-            'ordersByPackage' => $ordersByPackage,
-            'ordersByType' => $ordersByType,
-            'totalOrders' => $orders->count(),
+            'totalDays' => $reportData['totalDays'],
+            'total' => $reportData['total'],
+            'totalOrders' => $reportData['totalOrders'],
+            'averagePerDay' => $reportData['averagePerDay'],
+            'averagePerOrder' => $reportData['averagePerOrder'],
+            'topDay' => $reportData['topDay'],
+            'topDayAmount' => $reportData['topDayAmount'],
+            'bottomDay' => $reportData['bottomDay'],
+            'bottomDayAmount' => $reportData['bottomDayAmount'],
+            'ordersByPackage' => $reportData['ordersByPackage'],
+            'ordersByType' => $reportData['ordersByType'],
         ];
     }
 
@@ -151,11 +108,11 @@ class FinanceIncomeReport extends Page implements HasForms
             'totalOrders' => number_format($this->reportData['totalOrders']),
             'averagePerDay' => 'Rp ' . number_format($this->reportData['averagePerDay'], 0, ',', '.'),
             'averagePerOrder' => 'Rp ' . number_format($this->reportData['averagePerOrder'], 0, ',', '.'),
-            'topDay' => $this->reportData['topDay'] !== '-'
-                ? $this->reportData['topDay'] . ' (Rp ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
+            'topDay' => $this->reportData['topDay']
+                ? Carbon::parse($this->reportData['topDay'])->translatedFormat('j F Y') . ' (Rp ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
                 : '-',
-            'bottomDay' => $this->reportData['bottomDay'] !== '-'
-                ? $this->reportData['bottomDay'] . ' (Rp ' . number_format($this->reportData['bottomDayAmount'], 0, ',', '.') . ')'
+            'bottomDay' => $this->reportData['bottomDay']
+                ? Carbon::parse($this->reportData['bottomDay'])->translatedFormat('j F Y') . ' (Rp ' . number_format($this->reportData['bottomDayAmount'], 0, ',', '.') . ')'
                 : '-',
         ];
     }
@@ -224,13 +181,10 @@ class FinanceIncomeReport extends Page implements HasForms
                     }
 
                     try {
-                        $reportData = [
-                            'name' => $data['report_name'],
-                            'start_date' => $this->data['start_date'],
-                            'end_date' => $this->data['end_date'],
-                        ];
+                        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
 
-                        $pdf = FinanceIncomeReportService::generate($reportData);
+                        $pdf = FinanceIncomeReportService::generatePdf($data['report_name'], $startDate, $endDate);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')
@@ -249,7 +203,7 @@ class FinanceIncomeReport extends Page implements HasForms
                             ->send();
                     }
                 })
-                ->disabled(fn() => !$this->reportData || empty($this->reportData['total']))
+                ->disabled(fn() => !$this->reportData || $this->reportData['total'] == 0)
                 ->visible(fn() => $this->reportData !== null),
         ];
     }
