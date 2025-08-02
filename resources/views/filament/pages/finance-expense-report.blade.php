@@ -59,6 +59,11 @@
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Hari Tertinggi</dt>
                         <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['topDay'] }}</dd>
                     </div>
+
+                    <div class="space-y-2">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Hari Terendah</dt>
+                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['bottomDay'] }}</dd>
+                    </div>
                 </div>
             </x-filament::section>
 
@@ -102,15 +107,15 @@
                                             {{ $index + 1 }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data->needs ?? '-' }}
+                                            {{ $data['needs'] }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                            {{ number_format($data->jumlah_transaksi) }}
+                                            {{ number_format($data['jumlah_transaksi']) }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
-                                            Rp {{ number_format($data->total_pengeluaran, 0, ',', '.') }}
+                                            Rp {{ number_format($data['total_pengeluaran'], 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @empty

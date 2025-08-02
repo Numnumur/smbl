@@ -5,16 +5,21 @@
     <meta charset="UTF-8">
     <title>Laporan Keuangan - Pengeluaran</title>
     <style>
+        @page {
+            margin: 40px;
+        }
+
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
-            margin: 40px;
+            margin: 0;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 25px;
             font-size: 20px;
+            margin-top: 0;
         }
 
         h2 {
@@ -29,43 +34,72 @@
             width: auto;
             font-size: 13px;
             border: none;
+            margin-bottom: 30px;
         }
 
         .statistic-table td {
-            padding: 2px 6px;
+            padding: 4px 6px;
             vertical-align: top;
             white-space: nowrap;
             border: none;
         }
 
-        .statistic-table td:nth-child(1) {
+        .statistic-table td:nth-child(1),
+        .statistic-table td:nth-child(2) {
             width: 1px;
+            white-space: nowrap;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 30px;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
         }
 
         th,
         td {
             border: 1px solid #000;
             padding: 6px;
-            font-size: 12px;
+            vertical-align: top;
         }
 
         th {
-            text-align: center;
             background-color: #f0f0f0;
-        }
-
-        td.center,
-        th.center {
             text-align: center;
         }
 
-        .section {
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        td.center {
+            text-align: center;
+        }
+
+        td.left {
+            text-align: left;
+        }
+
+        td.right {
+            text-align: right;
+        }
+
+        .keep-together {
+            page-break-inside: avoid;
             margin-top: 50px;
         }
     </style>
@@ -73,7 +107,8 @@
 
 <body>
     <h1>{{ $name }}</h1>
-    <br><br>
+    <br>
+    <br>
     <table class="statistic-table">
         <tr>
             <td><strong>Periode</strong></td>
@@ -98,13 +133,30 @@
         <tr>
             <td><strong>Hari Tertinggi</strong></td>
             <td>:</td>
-            <td>{{ $topDay ? $topDay . ' (Rp ' . number_format($topDayAmount, 0, ',', '.') . ')' : '-' }}</td>
+            <td>
+                @if ($topDay !== '-')
+                    {{ $topDay }} (Rp {{ number_format($topDayAmount, 0, ',', '.') }})
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Hari Terendah</strong></td>
+            <td>:</td>
+            <td>
+                @if ($bottomDay !== '-')
+                    {{ $bottomDay }} (Rp {{ number_format($bottomDayAmount, 0, ',', '.') }})
+                @else
+                    -
+                @endif
+            </td>
         </tr>
     </table>
 
-    <div class="section">
+    <div class="keep-together">
         <h2>Pengeluaran Berdasarkan Kebutuhan</h2>
-        <table>
+        <table class="main-table">
             <thead>
                 <tr>
                     <th class="center">No</th>
@@ -114,21 +166,22 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($expensesByNeeds as $index => $data)
+                @forelse ($expensesByNeeds as $data)
                     <tr>
-                        <td class="center">{{ $index + 1 }}</td>
-                        <td>{{ $data->needs ?? '-' }}</td>
-                        <td class="center">{{ $data->jumlah_transaksi }}</td>
-                        <td>Rp {{ number_format($data->total_pengeluaran, 0, ',', '.') }}</td>
+                        <td class="center">{{ $loop->iteration }}</td>
+                        <td class="left">{{ $data['needs'] }}</td>
+                        <td class="center">{{ number_format($data['jumlah_transaksi']) }}</td>
+                        <td class="right">Rp {{ number_format($data['total_pengeluaran'], 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td class="center" colspan="4">Tidak ada data.</td>
+                        <td class="center" colspan="4">Tidak ada data kebutuhan</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
 </body>
 
 </html>
