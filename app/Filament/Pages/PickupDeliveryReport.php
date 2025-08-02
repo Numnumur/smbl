@@ -22,7 +22,8 @@ class PickupDeliveryReport extends Page implements HasForms
     use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
-    protected static ?string $navigationLabel = 'Laporan Antar Jemput';
+    protected static ?string $navigationLabel = 'Permintaan Antar Jemput';
+    protected static ?int $navigationSort = 18;
     protected static ?string $title = 'Laporan Permintaan Antar Jemput';
     protected static string $view = 'filament.pages.pickup-delivery-report';
     protected static ?string $navigationGroup = 'Laporan';

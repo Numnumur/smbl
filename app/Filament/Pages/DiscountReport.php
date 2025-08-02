@@ -22,7 +22,8 @@ class DiscountReport extends Page implements HasForms
     use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
-    protected static ?string $navigationLabel = 'Laporan Diskon';
+    protected static ?string $navigationLabel = 'Pemberian Diskon';
+    protected static ?int $navigationSort = 16;
     protected static ?string $title = 'Laporan Pemberian Diskon';
     protected static string $view = 'filament.pages.discount-report';
     protected static ?string $navigationGroup = 'Laporan';

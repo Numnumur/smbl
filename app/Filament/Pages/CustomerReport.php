@@ -21,8 +21,9 @@ class CustomerReport extends Page implements HasForms
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Laporan Pelanggan';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static ?string $navigationLabel = 'Pesanan Pelanggan';
+    protected static ?int $navigationSort = 14;
     protected static ?string $title = 'Laporan Pesanan Pelanggan';
     protected static string $view = 'filament.pages.customer-report';
     protected static ?string $navigationGroup = 'Laporan';

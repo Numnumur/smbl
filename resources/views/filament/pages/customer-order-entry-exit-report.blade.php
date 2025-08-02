@@ -87,7 +87,7 @@
             <x-filament::section>
                 <x-slot name="heading">
                     <div class="flex items-center gap-2">
-                        <x-heroicon-o-users class="w-5 h-5" />
+                        <x-heroicon-o-list-bullet class="w-5 h-5" />
                         Detail Keluar Masuk Pesanan Per Pelanggan
                     </div>
                 </x-slot>

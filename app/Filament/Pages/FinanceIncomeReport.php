@@ -22,7 +22,8 @@ class FinanceIncomeReport extends Page implements HasForms
     use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-    protected static ?string $navigationLabel = 'Laporan Pemasukan';
+    protected static ?string $navigationLabel = 'Keuangan Pemasukan';
+    protected static ?int $navigationSort = 11;
     protected static ?string $title = 'Laporan Keuangan - Pemasukan';
     protected static string $view = 'filament.pages.finance-income-report';
     protected static ?string $navigationGroup = 'Laporan';

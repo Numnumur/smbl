@@ -22,7 +22,8 @@ class CustomerOrderEntryExitReport extends Page implements HasForms
     use InteractsWithHeaderActions;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
-    protected static ?string $navigationLabel = 'Laporan Keluar Masuk';
+    protected static ?string $navigationLabel = 'Keluar Masuk Pesanan';
+    protected static ?int $navigationSort = 17;
     protected static ?string $title = 'Laporan Keluar Masuk Pesanan';
     protected static string $view = 'filament.pages.customer-order-entry-exit-report';
     protected static ?string $navigationGroup = 'Laporan';

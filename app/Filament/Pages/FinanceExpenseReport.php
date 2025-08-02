@@ -21,8 +21,9 @@ class FinanceExpenseReport extends Page implements HasForms
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-    protected static ?string $navigationLabel = 'Laporan Pengeluaran';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-up-circle';
+    protected static ?string $navigationLabel = 'Keuangan Pengeluaran';
+    protected static ?int $navigationSort = 12;
     protected static ?string $title = 'Laporan Keuangan - Pengeluaran';
     protected static string $view = 'filament.pages.finance-expense-report';
     protected static ?string $navigationGroup = 'Laporan';

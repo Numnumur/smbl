@@ -21,8 +21,9 @@ class OrderWorkReport extends Page implements HasForms
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-    protected static ?string $navigationLabel = 'Laporan Pengerjaan';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?string $navigationLabel = 'Pengerjaan Pesanan';
+    protected static ?int $navigationSort = 15;
     protected static ?string $title = 'Laporan Pengerjaan Pesanan';
     protected static string $view = 'filament.pages.order-work-report';
     protected static ?string $navigationGroup = 'Laporan';
