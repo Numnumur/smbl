@@ -32,6 +32,8 @@ class ExpenseResource extends Resource
 
     protected static ?string $group = 'Transaksi';
 
+    protected static ?int $navigationSort = 31;
+
     public static function form(Form $form): Form
     {
         return $form

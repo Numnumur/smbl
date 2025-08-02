@@ -30,6 +30,8 @@ class OrderPackageResource extends Resource
 
     protected static ?string $group = 'Manajemen Data';
 
+    protected static ?int $navigationSort = 23;
+
     public static function form(Form $form): Form
     {
         return $form

@@ -41,6 +41,8 @@ class OrderResource extends Resource
 
     protected static ?string $group = 'Transaksi';
 
+    protected static ?int $navigationSort = 32;
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()->hasRole('super_admin');

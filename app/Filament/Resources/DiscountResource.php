@@ -32,6 +32,8 @@ class DiscountResource extends Resource
 
     protected static ?string $group = 'Manajemen Data';
 
+    protected static ?int $navigationSort = 22;
+
     public static function form(Form $form): Form
     {
         return $form
