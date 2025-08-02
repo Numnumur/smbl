@@ -133,7 +133,14 @@ class OrderResource extends Resource
                             ->native(false)
                             ->disabled(fn(callable $get) => in_array($get('status'), ['Baru', 'Selesai Diproses']))
                             ->required(fn(callable $get) => $get('status') === 'Selesai')
-                            ->seconds(false),
+                            ->seconds(false)
+                            ->afterOrEqual('entry_date')
+                            ->minDate(fn(callable $get) => $get('entry_date'))
+                            ->helperText('Tidak bisa lebih kecil dari tanggal pesanan masuk')
+                            ->rules(['after_or_equal:entry_date'])
+                            ->validationMessages([
+                                'after_or_equal' => 'Tanggal pesanan selesai tidak boleh lebih awal dari tanggal pesanan masuk',
+                            ]),
                         Forms\Components\Select::make('customer_id')
                             ->label('Pelanggan')
                             ->options(
