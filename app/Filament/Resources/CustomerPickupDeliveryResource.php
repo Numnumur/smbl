@@ -19,6 +19,7 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +32,7 @@ class CustomerPickupDeliveryResource extends Resource
 
     protected static ?string $title = 'Riwayat Antar Jemput';
 
-    protected static ?string $icon = 'heroicon-o-archive-box';
+    protected static ?string $icon = 'heroicon-o-truck';
 
     protected static ?string $group = '';
 
@@ -87,7 +88,14 @@ class CustomerPickupDeliveryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Jenis Permintaan')
+                    ->options([
+                        'Antar' => 'Antar',
+                        'Jemput' => 'Jemput',
+                        'Antar dan Jemput' => 'Antar dan Jemput',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Action::make('kirimWaAdmin')

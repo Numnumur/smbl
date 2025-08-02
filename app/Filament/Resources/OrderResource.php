@@ -27,6 +27,7 @@ use App\Models\WhatsappSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
 
 class OrderResource extends Resource
 {
@@ -364,7 +365,15 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Tipe Pesanan')
+                    ->options([
+                        'Kiloan' => 'Kiloan',
+                        'Satuan' => 'Satuan',
+                        'Lembaran' => 'Lembaran',
+                        'Karpet' => 'Karpet',
+                    ])
+                    ->native(false),
             ])
             ->defaultSort('entry_date', 'desc')
             ->actions([

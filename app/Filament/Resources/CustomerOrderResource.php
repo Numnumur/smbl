@@ -18,6 +18,7 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Group;
 use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
 
 class CustomerOrderResource extends Resource
 {
@@ -82,7 +83,15 @@ class CustomerOrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Tipe Pesanan')
+                    ->options([
+                        'Kiloan' => 'Kiloan',
+                        'Satuan' => 'Satuan',
+                        'Lembaran' => 'Lembaran',
+                        'Karpet' => 'Karpet',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
