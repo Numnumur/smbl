@@ -42,10 +42,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->topNavigation()
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Manajemen Data'),
-                NavigationGroup::make()
-                    ->label('Transaksi'),
+                'Laporan',
+                'Manajemen Data',
+                'Transaksi',
+                'Lainnya',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

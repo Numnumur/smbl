@@ -15,11 +15,13 @@ use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class CustomerOrderEntryExitReport extends Page implements HasForms
 {
     use InteractsWithForms;
     use InteractsWithHeaderActions;
+    use HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
     protected static ?string $navigationLabel = 'Keluar Masuk Pesanan';

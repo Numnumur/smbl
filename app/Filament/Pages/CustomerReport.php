@@ -15,11 +15,13 @@ use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class CustomerReport extends Page implements HasForms
 {
     use InteractsWithForms;
     use InteractsWithHeaderActions;
+    use HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
     protected static ?string $navigationLabel = 'Pesanan Pelanggan';
