@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Illuminate\Support\Carbon;
 
 class DiscountResource extends Resource
 {
@@ -76,6 +77,7 @@ class DiscountResource extends Resource
                                     ->disabled(function ($get) {
                                         return $get('type') === null;
                                     })
+                                    ->minDate(Carbon::today())
                                     ->reactive()
                                     ->rules(['after_or_equal:today'])
                                     ->validationMessages([
@@ -86,8 +88,10 @@ class DiscountResource extends Resource
                                     ->native(false)
                                     ->required()
                                     ->afterOrEqual('start_date')
-                                    ->disabled(fn($get) => $get('type') === null)
+                                    ->minDate(fn(callable $get) => $get('start_date'))
                                     ->reactive()
+                                    ->disabled(fn($get) => $get('type') === null)
+                                    ->helperText('Tidak bisa lebih kecil dari tanggal awal')
                                     ->rules(['after_or_equal:start_date'])
                                     ->validationMessages([
                                         'after_or_equal' => 'Tanggal hingga tidak boleh lebih awal dari tanggal mulai.',
