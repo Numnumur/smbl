@@ -3,23 +3,15 @@
 namespace App\Services\Reports;
 
 use App\Models\Customer;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Spatie\Browsershot\Browsershot;
 
 class CustomerReportService
 {
-    /**
-     * Menghasilkan data laporan pelanggan berdasarkan rentang tanggal.
-     *
-     * @param Carbon $startDate
-     * @param Carbon $endDate
-     * @return Collection
-     */
     public static function generate(Carbon $startDate, Carbon $endDate): Collection
     {
         return Customer::with(['user', 'orders'])->get()->map(function ($customer) use ($startDate, $endDate) {
-            // Filter pesanan berdasarkan rentang tanggal
             $orders = $customer->orders->whereBetween('entry_date', [$startDate, $endDate]);
 
             $totalOrders = $orders->count();
@@ -46,36 +38,28 @@ class CustomerReportService
         })->filter(fn($data) => $data['total_orders'] > 0)->values();
     }
 
-
-    /**
-     * Menghasilkan file PDF laporan pelanggan.
-     *
-     * @param string $name
-     * @param Carbon $startDate
-     * @param Carbon $endDate
-     * @return string
-     */
     public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate)
     {
-        // Mendapatkan data detail pelanggan
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+        $totalDays = $days;
         $customers = self::generate($startDate, $endDate);
 
-        // Menghitung statistik ringkasan dari data yang sudah ada
+        // Calculate statistics
         $totalCustomers = $customers->count();
         $totalOrders = $customers->sum('total_orders');
         $totalIncome = $customers->sum('total_income');
-        $averageOrdersPerCustomer = $totalCustomers > 0 ? $totalOrders / $totalCustomers : 0;
-        $averageIncomePerCustomer = $totalCustomers > 0 ? $totalIncome / $totalCustomers : 0;
+        $averageOrdersPerCustomer = $totalCustomers > 0 ? round($totalOrders / $totalCustomers, 2) : 0;
+        $averageIncomePerCustomer = $totalCustomers > 0 ? round($totalIncome / $totalCustomers, 2) : 0;
+
+        // Top customer by orders and income
         $topCustomerByOrders = $customers->sortByDesc('total_orders')->first();
         $topCustomerByIncome = $customers->sortByDesc('total_income')->first();
-
-        $days = (int) $startDate->diffInDays($endDate) + 1;
 
         $html = view('pdf.customer-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => $days,
+            'totalDays' => $totalDays,
             'customers' => $customers,
             'totalCustomers' => $totalCustomers,
             'totalOrders' => $totalOrders,
@@ -89,13 +73,6 @@ class CustomerReportService
         return Browsershot::html($html)->pdf();
     }
 
-    /**
-     * Mengubah selisih tanggal menjadi format yang mudah dibaca.
-     *
-     * @param Carbon $date
-     * @param Carbon $endDate
-     * @return string
-     */
     protected static function humanReadableDiff(Carbon $date, Carbon $endDate): string
     {
         $diff = $date->diffForHumans($endDate, ['parts' => 2, 'short' => true]);

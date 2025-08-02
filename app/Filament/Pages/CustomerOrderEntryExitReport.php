@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Services\Reports\CustomerReportService;
+use App\Services\Reports\CustomerOrderEntryExitReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Filament\Pages\Concerns\InteractsWithHeaderActions;
@@ -16,16 +16,16 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 
-class CustomerReport extends Page implements HasForms
+class CustomerOrderEntryExitReport extends Page implements HasForms
 {
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationLabel = 'Pesanan Pelanggan';
-    protected static ?int $navigationSort = 14;
-    protected static ?string $title = 'Laporan Pesanan Pelanggan';
-    protected static string $view = 'filament.pages.customer-report';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static ?string $navigationLabel = 'Keluar Masuk Pesanan';
+    protected static ?int $navigationSort = 17;
+    protected static ?string $title = 'Laporan Keluar Masuk Pesanan';
+    protected static string $view = 'filament.pages.customer-order-entry-exit-report';
     protected static ?string $navigationGroup = 'Laporan';
 
     public ?array $data = [];
@@ -78,32 +78,32 @@ class CustomerReport extends Page implements HasForms
         $startDate = Carbon::parse($data['start_date'])->startOfDay();
         $endDate = Carbon::parse($data['end_date'])->endOfDay();
 
-        $customers = CustomerReportService::generate($startDate, $endDate);
+        $reportData = CustomerOrderEntryExitReportService::generate($startDate, $endDate);
         $days = (int) $startDate->diffInDays($endDate) + 1;
 
-        // Calculate statistics
-        $totalCustomers = $customers->count();
-        $totalOrders = $customers->sum('total_orders');
-        $totalIncome = $customers->sum('total_income');
-        $averageOrdersPerCustomer = $totalCustomers > 0 ? round($totalOrders / $totalCustomers, 2) : 0;
-        $averageIncomePerCustomer = $totalCustomers > 0 ? round($totalIncome / $totalCustomers, 2) : 0;
+        // Calculate additional statistics
+        $totalCustomers = $reportData['totalCustomers'];
+        $totalEntry = $reportData['totalEntry'];
+        $totalExit = $reportData['totalExit'];
+        $totalCustomersWithEntry = $reportData['customers']->where('entry', '>', 0)->count();
+        $totalCustomersWithExit = $reportData['customers']->where('exit', '>', 0)->count();
 
-        // Top customer by orders and income
-        $topCustomerByOrders = $customers->sortByDesc('total_orders')->first();
-        $topCustomerByIncome = $customers->sortByDesc('total_income')->first();
+        // Most active customers
+        $pelangganTerbanyakMasuk = $reportData['customers']->sortByDesc('entry')->first();
+        $pelangganTerbanyakKeluar = $reportData['customers']->sortByDesc('exit')->first();
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
             'totalDays' => $days,
-            'customers' => $customers,
             'totalCustomers' => $totalCustomers,
-            'totalOrders' => $totalOrders,
-            'totalIncome' => $totalIncome,
-            'averageOrdersPerCustomer' => $averageOrdersPerCustomer,
-            'averageIncomePerCustomer' => $averageIncomePerCustomer,
-            'topCustomerByOrders' => $topCustomerByOrders,
-            'topCustomerByIncome' => $topCustomerByIncome,
+            'totalEntry' => $totalEntry,
+            'totalExit' => $totalExit,
+            'totalCustomersWithEntry' => $totalCustomersWithEntry,
+            'totalCustomersWithExit' => $totalCustomersWithExit,
+            'pelangganTerbanyakMasuk' => $pelangganTerbanyakMasuk,
+            'pelangganTerbanyakKeluar' => $pelangganTerbanyakKeluar,
+            'customers' => $reportData['customers'],
         ];
     }
 
@@ -116,20 +116,20 @@ class CustomerReport extends Page implements HasForms
         return [
             'period' => $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'] . ' (' . $this->reportData['totalDays'] . ' hari)',
             'totalCustomers' => number_format($this->reportData['totalCustomers']),
-            'totalOrders' => number_format($this->reportData['totalOrders']),
-            'totalIncome' => 'Rp ' . number_format($this->reportData['totalIncome'], 0, ',', '.'),
-            'averageOrdersPerCustomer' => number_format($this->reportData['averageOrdersPerCustomer'], 1),
-            'averageIncomePerCustomer' => 'Rp ' . number_format($this->reportData['averageIncomePerCustomer'], 0, ',', '.'),
-            'topCustomerByOrders' => $this->reportData['topCustomerByOrders']
-                ? $this->reportData['topCustomerByOrders']['name'] . ' (' . $this->reportData['topCustomerByOrders']['total_orders'] . ' pesanan)'
+            'totalEntry' => number_format($this->reportData['totalEntry']),
+            'totalExit' => number_format($this->reportData['totalExit']),
+            'totalCustomersWithEntry' => number_format($this->reportData['totalCustomersWithEntry']),
+            'totalCustomersWithExit' => number_format($this->reportData['totalCustomersWithExit']),
+            'pelangganTerbanyakMasuk' => $this->reportData['pelangganTerbanyakMasuk']
+                ? $this->reportData['pelangganTerbanyakMasuk']['name'] . ' (' . $this->reportData['pelangganTerbanyakMasuk']['entry'] . ' pesanan)'
                 : '-',
-            'topCustomerByIncome' => $this->reportData['topCustomerByIncome']
-                ? $this->reportData['topCustomerByIncome']['name'] . ' (Rp ' . number_format($this->reportData['topCustomerByIncome']['total_income'], 0, ',', '.') . ')'
+            'pelangganTerbanyakKeluar' => $this->reportData['pelangganTerbanyakKeluar']
+                ? $this->reportData['pelangganTerbanyakKeluar']['name'] . ' (' . $this->reportData['pelangganTerbanyakKeluar']['exit'] . ' pesanan)'
                 : '-',
         ];
     }
 
-    public function getCustomersData()
+    public function getCustomerData()
     {
         if (!$this->reportData) {
             return collect();
@@ -140,7 +140,7 @@ class CustomerReport extends Page implements HasForms
 
     public function getTitle(): string
     {
-        return 'Laporan Pesanan Pelanggan';
+        return 'Laporan Keluar Masuk Pesanan';
     }
 
     public function getHeaderActions(): array
@@ -159,12 +159,12 @@ class CustomerReport extends Page implements HasForms
                             TextInput::make('report_name')
                                 ->label('Nama Laporan')
                                 ->required()
-                                ->placeholder('Contoh: Laporan Pelanggan Januari 2025')
+                                ->placeholder('Contoh: Laporan Keluar Masuk Januari 2025')
                                 ->default(function () {
                                     if ($this->reportData) {
-                                        return 'Laporan Pelanggan ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
+                                        return 'Laporan Keluar Masuk ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
                                     }
-                                    return 'Laporan Pelanggan';
+                                    return 'Laporan Keluar Masuk';
                                 })
                                 ->helperText('Nama ini akan muncul sebagai judul di laporan PDF')
                                 ->maxLength(100)
@@ -187,7 +187,7 @@ class CustomerReport extends Page implements HasForms
                         $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
                         $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
 
-                        $pdf = CustomerReportService::generatePdf($data['report_name'], $startDate, $endDate);
+                        $pdf = CustomerOrderEntryExitReportService::generatePdf($data['report_name'], $startDate, $endDate);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')

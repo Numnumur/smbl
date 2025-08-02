@@ -37,7 +37,8 @@
                     <div class="space-y-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pelanggan</dt>
                         <dd class="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                            {{ $summary['totalCustomers'] }}</dd>
+                            {{ $summary['totalCustomers'] }}
+                        </dd>
                     </div>
 
                     <div class="space-y-2">
@@ -72,18 +73,18 @@
                     </div>
 
                     <div class="space-y-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pelanggan Terbesar Pemasukan
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pelanggan Tertinggi Pemasukan
                         </dt>
                         <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['topCustomerByIncome'] }}</dd>
                     </div>
                 </div>
             </x-filament::section>
 
-            {{-- Customer Data Table --}}
+            {{-- Customers Table --}}
             <x-filament::section>
                 <x-slot name="heading">
                     <div class="flex items-center gap-2">
-                        <x-heroicon-o-users class="w-5 h-5" />
+                        <x-heroicon-o-shopping-bag class="w-5 h-5" />
                         Detail Pesanan Pelanggan
                     </div>
                 </x-slot>
@@ -102,36 +103,35 @@
                                         Nama Pelanggan
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Informasi Pesanan
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
+                                        Pesanan
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
                                         Pemasukan
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
                                         Paket Pesanan
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse($this->getCustomersData() as $index => $customer)
-                                    <tr
-                                        class="{{ $index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800' }}">
+                                    <tr>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $index + 1 }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             {{ $customer['name'] }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             <div class="space-y-1">
-                                                <div><span class="font-medium">Total:</span>
-                                                    {{ number_format($customer['total_orders']) }} pesanan</div>
-                                                <div><span class="font-medium">Terakhir:</span>
-                                                    {{ $customer['last_order_date'] }}</div>
+                                                <div><strong>Total:</strong>
+                                                    {{ number_format($customer['total_orders']) }}</div>
+                                                <div><strong>Terakhir:</strong> {{ $customer['last_order_date'] }}
+                                                </div>
                                                 @if ($customer['last_order_diff'] !== '-')
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $customer['last_order_diff'] }}</div>
@@ -140,25 +140,20 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             <div class="space-y-1">
-                                                <div><span class="font-medium">Total:</span> Rp
+                                                <div><strong>Total:</strong> Rp
                                                     {{ number_format($customer['total_income'], 0, ',', '.') }}</div>
-                                                <div><span class="font-medium">Rata-rata:</span> Rp
+                                                <div><strong>Rata-rata:</strong> Rp
                                                     {{ number_format($customer['average_income'], 0, ',', '.') }}</div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            @if ($customer['packages']->isNotEmpty())
-                                                <div class="space-y-1">
-                                                    @foreach ($customer['packages'] as $package => $count)
-                                                        <div class="flex justify-between">
-                                                            <span>{{ $package ?: 'Tidak ada paket' }}</span>
-                                                            <span class="font-medium">({{ $count }})</span>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <span class="text-gray-500 dark:text-gray-400">-</span>
-                                            @endif
+                                            <div class="space-y-1">
+                                                @forelse($customer['packages'] as $package => $count)
+                                                    <div>• {{ $package }} ({{ $count }})</div>
+                                                @empty
+                                                    <div class="text-gray-500 dark:text-gray-400">-</div>
+                                                @endforelse
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -180,7 +175,7 @@
         @else
             <x-filament::section>
                 <div class="text-center py-12">
-                    <x-heroicon-o-users class="mx-auto h-12 w-12 text-gray-400" />
+                    <x-heroicon-o-document-chart-bar class="mx-auto h-12 w-12 text-gray-400" />
                     <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                         Belum Ada Data
                     </h3>

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Expense;
 use App\Services\Reports\FinanceExpenseReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
@@ -15,7 +14,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 
 class FinanceExpenseReport extends Page implements HasForms
@@ -23,8 +21,9 @@ class FinanceExpenseReport extends Page implements HasForms
     use InteractsWithForms;
     use InteractsWithHeaderActions;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-    protected static ?string $navigationLabel = 'Laporan Pengeluaran';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-up-circle';
+    protected static ?string $navigationLabel = 'Keuangan Pengeluaran';
+    protected static ?int $navigationSort = 12;
     protected static ?string $title = 'Laporan Keuangan - Pengeluaran';
     protected static string $view = 'filament.pages.finance-expense-report';
     protected static ?string $navigationGroup = 'Laporan';
@@ -32,10 +31,6 @@ class FinanceExpenseReport extends Page implements HasForms
     public ?array $data = [];
     public $reportData = null;
 
-    /**
-     * Mount the component and initialize the form with default date values.
-     * Then, generate the initial report.
-     */
     public function mount(): void
     {
         $this->form->fill([
@@ -46,9 +41,6 @@ class FinanceExpenseReport extends Page implements HasForms
         $this->generateReport();
     }
 
-    /**
-     * Define the form schema for filtering the report data.
-     */
     public function form(Form $form): Form
     {
         return $form
@@ -75,9 +67,6 @@ class FinanceExpenseReport extends Page implements HasForms
             ->statePath('data');
     }
 
-    /**
-     * Generate the report data based on the selected date range.
-     */
     public function generateReport(): void
     {
         $data = $this->form->getState();
@@ -89,44 +78,24 @@ class FinanceExpenseReport extends Page implements HasForms
         $startDate = Carbon::parse($data['start_date'])->startOfDay();
         $endDate = Carbon::parse($data['end_date'])->endOfDay();
 
-        $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
-
-        $total = $expenses->sum('price');
-        $days = (int) $startDate->diffInDays($endDate) + 1;
-
-        $averagePerDay = $days > 0 ? $total / $days : 0;
-        $averagePerTransaction = $expenses->count() > 0 ? $total / $expenses->count() : 0;
-
-        $groupedByDay = $expenses->groupBy(
-            fn($expense) => Carbon::parse($expense->date)->format('Y-m-d')
-        )->map(fn($group) => $group->sum('price'));
-
-        $topDay = $groupedByDay->sortDesc()->keys()->first();
-        $topDayAmount = $groupedByDay->max() ?? 0;
-
-        $expensesByNeeds = Expense::select('needs', DB::raw('COUNT(*) as jumlah_transaksi'), DB::raw('SUM(price) as total_pengeluaran'))
-            ->whereBetween('date', [$startDate, $endDate])
-            ->groupBy('needs')
-            ->orderByDesc('total_pengeluaran')
-            ->get();
+        $reportData = FinanceExpenseReportService::generate($startDate, $endDate);
 
         $this->reportData = [
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
-            'totalDays' => $days,
-            'total' => $total,
-            'totalTransactions' => $expenses->count(),
-            'averagePerDay' => $averagePerDay,
-            'averagePerTransaction' => $averagePerTransaction,
-            'topDay' => $topDay ? Carbon::parse($topDay)->translatedFormat('j F Y') : '-',
-            'topDayAmount' => $topDayAmount,
-            'expensesByNeeds' => $expensesByNeeds,
+            'totalDays' => $reportData['totalDays'],
+            'total' => $reportData['total'],
+            'totalTransactions' => $reportData['totalTransactions'],
+            'averagePerDay' => $reportData['averagePerDay'],
+            'averagePerTransaction' => $reportData['averagePerTransaction'],
+            'topDay' => $reportData['topDay'],
+            'topDayAmount' => $reportData['topDayAmount'],
+            'bottomDay' => $reportData['bottomDay'],
+            'bottomDayAmount' => $reportData['bottomDayAmount'],
+            'expensesByNeeds' => $reportData['expensesByNeeds'],
         ];
     }
 
-    /**
-     * Prepare summary data for the Blade view.
-     */
     public function getSummaryData()
     {
         if (!$this->reportData) {
@@ -139,15 +108,15 @@ class FinanceExpenseReport extends Page implements HasForms
             'totalTransactions' => number_format($this->reportData['totalTransactions']),
             'averagePerDay' => 'Rp ' . number_format($this->reportData['averagePerDay'], 0, ',', '.'),
             'averagePerTransaction' => 'Rp ' . number_format($this->reportData['averagePerTransaction'], 0, ',', '.'),
-            'topDay' => $this->reportData['topDay'] !== '-'
-                ? $this->reportData['topDay'] . ' (Rp ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
+            'topDay' => $this->reportData['topDay']
+                ? Carbon::parse($this->reportData['topDay'])->translatedFormat('j F Y') . ' (Rp ' . number_format($this->reportData['topDayAmount'], 0, ',', '.') . ')'
+                : '-',
+            'bottomDay' => $this->reportData['bottomDay']
+                ? Carbon::parse($this->reportData['bottomDay'])->translatedFormat('j F Y') . ' (Rp ' . number_format($this->reportData['bottomDayAmount'], 0, ',', '.') . ')'
                 : '-',
         ];
     }
 
-    /**
-     * Get the expense data grouped by needs for the Blade view.
-     */
     public function getExpensesByNeedsData()
     {
         if (!$this->reportData) {
@@ -159,12 +128,9 @@ class FinanceExpenseReport extends Page implements HasForms
 
     public function getTitle(): string
     {
-        return static::$title;
+        return 'Laporan Keuangan - Pengeluaran';
     }
 
-    /**
-     * Define the header actions, including the "Cetak Laporan PDF" button.
-     */
     public function getHeaderActions(): array
     {
         return [
@@ -181,7 +147,7 @@ class FinanceExpenseReport extends Page implements HasForms
                             TextInput::make('report_name')
                                 ->label('Nama Laporan')
                                 ->required()
-                                ->placeholder('Contoh: Laporan Pengeluaran Juli 2025')
+                                ->placeholder('Contoh: Laporan Pengeluaran Januari 2025')
                                 ->default(function () {
                                     if ($this->reportData) {
                                         return 'Laporan Pengeluaran ' . $this->reportData['startDate'] . ' - ' . $this->reportData['endDate'];
@@ -206,13 +172,10 @@ class FinanceExpenseReport extends Page implements HasForms
                     }
 
                     try {
-                        $reportData = [
-                            'name' => $data['report_name'],
-                            'start_date' => $this->data['start_date'],
-                            'end_date' => $this->data['end_date'],
-                        ];
+                        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+                        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
 
-                        $pdf = FinanceExpenseReportService::generate($reportData);
+                        $pdf = FinanceExpenseReportService::generatePdf($data['report_name'], $startDate, $endDate);
 
                         Notification::make()
                             ->title('PDF Berhasil Dibuat')
@@ -231,7 +194,7 @@ class FinanceExpenseReport extends Page implements HasForms
                             ->send();
                     }
                 })
-                ->disabled(fn() => !$this->reportData || empty($this->reportData['total']))
+                ->disabled(fn() => !$this->reportData || $this->reportData['total'] == 0)
                 ->visible(fn() => $this->reportData !== null),
         ];
     }

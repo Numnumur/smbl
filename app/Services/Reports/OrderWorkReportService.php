@@ -12,7 +12,7 @@ class OrderWorkReportService
     public static function generate(Carbon $startDate, Carbon $endDate): Collection
     {
         $orders = Order::whereBetween('entry_date', [$startDate, $endDate])->get();
-        $ordersFinished = $orders->filter(fn($order) => $order->status !== 'Baru');
+        $ordersFinished = $orders->whereIn('status', ['Selesai Diproses', 'Selesai']);
 
         $ordersByPackage = $ordersFinished
             ->groupBy(fn($order) => $order->order_package . '|' . $order->type)
@@ -49,7 +49,6 @@ class OrderWorkReportService
             ->sortByDesc('jumlah_pesanan')
             ->values();
 
-
         $ordersByType = $ordersFinished
             ->groupBy('type')
             ->map(function ($grouped, $type) {
@@ -80,7 +79,6 @@ class OrderWorkReportService
             ->sortByDesc('jumlah_pesanan')
             ->values();
 
-
         $ordersKarpetByUkuran = $ordersFinished
             ->where('type', 'Karpet')
             ->groupBy(fn($order) => (int) $order->length . ' cm x ' . (int) $order->width . ' cm')
@@ -92,7 +90,6 @@ class OrderWorkReportService
             })
             ->sortByDesc('jumlah')
             ->values();
-
 
         return collect([
             'totalPesananMasuk' => $orders->count(),
@@ -110,13 +107,27 @@ class OrderWorkReportService
 
         $data = self::generate($startDate, $endDate);
 
+        // Calculate additional statistics for PDF
+        $totalPesananMasuk = $data['totalPesananMasuk'];
+        $totalPesananSelesai = $data['totalPesananSelesai'];
+        $totalPaketPesanan = $data['ordersByPackage']->count();
+        $totalTipePaketPesanan = $data['ordersByType']->count();
+
+        // Most popular package and type
+        $paketTerpopuler = $data['ordersByPackage']->first();
+        $tipeTerpopuler = $data['ordersByType']->first();
+
         $html = view('pdf.order-work-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
             'totalDays' => $totalDays,
-            'totalPesananMasuk' => $data['totalPesananMasuk'],
-            'totalPesananSelesai' => $data['totalPesananSelesai'],
+            'totalPesananMasuk' => $totalPesananMasuk,
+            'totalPesananSelesai' => $totalPesananSelesai,
+            'totalPaketPesanan' => $totalPaketPesanan,
+            'totalTipePaketPesanan' => $totalTipePaketPesanan,
+            'paketTerpopuler' => $paketTerpopuler,
+            'tipeTerpopuler' => $tipeTerpopuler,
             'ordersByPackage' => $data['ordersByPackage'],
             'ordersByType' => $data['ordersByType'],
             'ordersKarpetByUkuran' => $data['ordersKarpetByUkuran'],
@@ -134,7 +145,6 @@ class OrderWorkReportService
             default => '',
         };
     }
-
 
     protected static function getTotalPengerjaan(Order $order): float|int
     {

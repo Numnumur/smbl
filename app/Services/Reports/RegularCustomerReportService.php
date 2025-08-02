@@ -4,31 +4,20 @@ namespace App\Services\Reports;
 
 use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\Browsershot\Browsershot;
 
 class RegularCustomerReportService
 {
-    /**
-     * Generate a PDF report for regular customers based on order criteria.
-     *
-     * @param array $data Contains 'name', 'start_date', 'end_date', and 'kriteria_minimum_pesanan'.
-     * @return string The PDF content.
-     */
-    public static function generate(array $data)
+    public static function generate(Carbon $startDate, Carbon $endDate, int $minOrders): Collection
     {
-        $startDate = Carbon::parse($data['start_date'])->startOfDay();
-        $endDate = Carbon::parse($data['end_date'])->endOfDay();
-        $days = (int) $startDate->diffInDays($endDate) + 1;
-        $totalDays = $days;
-
-        $minOrders = $data['kriteria_minimum_pesanan'];
-
         $orders = Order::with('customer.user')
             ->where('status', 'Selesai')
             ->whereBetween('entry_date', [$startDate, $endDate])
             ->get();
 
+        $days = (int) $startDate->diffInDays($endDate) + 1;
         $totalCustomers = $orders->pluck('customer_id')->unique()->count();
 
         $grouped = $orders->groupBy('customer_id')->filter(function ($orders) use ($minOrders) {
@@ -37,6 +26,7 @@ class RegularCustomerReportService
 
         $qualifiedCustomers = $grouped->count();
 
+        // Process customers - convert to array collection like Finance Income
         $customers = $grouped->map(function ($orders) {
             $first = $orders->first();
             $user = $first->customer?->user;
@@ -46,11 +36,31 @@ class RegularCustomerReportService
                 'name' => $user?->name ?? '-',
                 'whatsapp' => $customer->whatsapp ? '+' . $customer->whatsapp : '-',
                 'address' => $customer->address ?? '-',
+                'total_orders' => $orders->count(),
             ];
-        })->values();
+        })->sortBy('name')->values();
+
+        return collect([
+            'totalDays' => $days,
+            'totalCustomers' => $totalCustomers,
+            'qualifiedCustomers' => $qualifiedCustomers,
+            'minOrders' => $minOrders,
+            'customers' => $customers,
+        ]);
+    }
+
+    public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate, int $minOrders): string
+    {
+        $data = self::generate($startDate, $endDate, $minOrders);
+
+        // Extract data for PDF
+        $totalDays = $data['totalDays'];
+        $totalCustomers = $data['totalCustomers'];
+        $qualifiedCustomers = $data['qualifiedCustomers'];
+        $customers = $data['customers'];
 
         $html = view('pdf.regular-customer', [
-            'name' => $data['name'],
+            'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
             'endDate' => $endDate->translatedFormat('j F Y'),
             'totalDays' => $totalDays,

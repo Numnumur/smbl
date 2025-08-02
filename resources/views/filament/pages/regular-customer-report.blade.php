@@ -41,13 +41,13 @@
 
                     <div class="space-y-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Kriteria Minimum Pesanan</dt>
-                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['minOrders'] }} kali</dd>
+                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['minOrders'] }}</dd>
                     </div>
 
                     <div class="space-y-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pelanggan Memenuhi Kriteria
                         </dt>
-                        <dd class="text-sm font-semibold text-primary-600 dark:text-primary-400">
+                        <dd class="text-sm font-semibold text-green-600 dark:text-green-400">
                             {{ $summary['qualifiedCustomers'] }}</dd>
                     </div>
                 </div>
@@ -76,7 +76,11 @@
                                         Nama
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                                        Total Pesanan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
                                         Nomor WhatsApp
                                     </th>
                                     <th
@@ -93,18 +97,22 @@
                                             {{ $index + 1 }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data['name'] ?? '-' }}
+                                            {{ $data['name'] }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                            {{ number_format($data['total_orders']) }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data['whatsapp'] ?? '-' }}
+                                            {{ $data['whatsapp'] }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $data['address'] ?? '-' }}
+                                            {{ $data['address'] }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4"
+                                        <td colspan="5"
                                             class="px-6 py-8 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
                                             <div class="flex flex-col items-center">
                                                 <x-heroicon-o-inbox class="w-8 h-8 mb-2" />

@@ -4,28 +4,25 @@ namespace App\Services\Reports;
 
 use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Spatie\Browsershot\Browsershot;
 
 class DiscountReportService
 {
-    public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate)
+    public static function generate(Carbon $startDate, Carbon $endDate): Collection
     {
-        $days = (int) $startDate->diffInDays($endDate) + 1;
-        $totalDays = $days;
-
         $orders = Order::query()
             ->whereNotNull('discount_name')
             ->where('status', 'Selesai')
-            ->whereBetween('exit_date', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->whereBetween('exit_date', [$startDate, $endDate])
             ->get();
 
+        $totalUsage = $orders->count();
         $totalDiscount = $orders->sum(function ($order) {
             return $order->discount_type === 'Persentase'
                 ? $order->total_price_before_discount - $order->total_price
                 : $order->discount_value;
         });
-
-        $totalUsage = $orders->count();
 
         $byDiscount = $orders->groupBy('discount_name')->map(function ($group, $name) {
             return [
@@ -37,7 +34,7 @@ class DiscountReportService
                         : $order->discount_value;
                 }),
             ];
-        })->values();
+        })->sortByDesc('count')->values();
 
         $byPackage = $orders->groupBy(fn($order) => $order->discount_name . '_' . $order->order_package)->map(function ($group) {
             $first = $group->first();
@@ -53,7 +50,7 @@ class DiscountReportService
                         : $order->discount_value;
                 }),
             ];
-        })->values();
+        })->sortByDesc('count')->values();
 
         $byType = $orders->groupBy('type')->map(function ($group, $type) {
             return [
@@ -65,7 +62,33 @@ class DiscountReportService
                         : $order->discount_value;
                 }),
             ];
-        })->values();
+        })->sortByDesc('count')->values();
+
+        return collect([
+            'totalUsage' => $totalUsage,
+            'totalDiscount' => $totalDiscount,
+            'byDiscount' => $byDiscount,
+            'byPackage' => $byPackage,
+            'byType' => $byType,
+        ]);
+    }
+
+    public static function generatePdf(string $name, Carbon $startDate, Carbon $endDate): string
+    {
+        $days = (int) $startDate->diffInDays($endDate) + 1;
+        $totalDays = $days;
+
+        $data = self::generate($startDate, $endDate);
+
+        // Calculate additional statistics for PDF (sama seperti di halaman report)
+        $totalUsage = $data['totalUsage'];
+        $totalDiscount = $data['totalDiscount'];
+        $totalDiscountTypes = $data['byDiscount']->count();
+        $totalPackageDiscounts = $data['byPackage']->count();
+
+        // Most popular discount and package
+        $diskonTerpopuler = $data['byDiscount']->first();
+        $paketTerbanyakDiskon = $data['byPackage']->first();
 
         $html = view('pdf.discount-report', [
             'name' => $name,
@@ -74,12 +97,15 @@ class DiscountReportService
             'totalDays' => $totalDays,
             'totalUsage' => $totalUsage,
             'totalDiscount' => $totalDiscount,
-            'byDiscount' => $byDiscount,
-            'byPackage' => $byPackage,
-            'byType' => $byType,
+            'totalDiscountTypes' => $totalDiscountTypes,
+            'totalPackageDiscounts' => $totalPackageDiscounts,
+            'diskonTerpopuler' => $diskonTerpopuler,
+            'paketTerbanyakDiskon' => $paketTerbanyakDiskon,
+            'byDiscount' => $data['byDiscount'],
+            'byPackage' => $data['byPackage'],
+            'byType' => $data['byType'],
         ])->render();
 
-        // Kembalikan file PDF
         return Browsershot::html($html)->pdf();
     }
 }
