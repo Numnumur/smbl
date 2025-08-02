@@ -12,4 +12,10 @@ class CreateDiscount extends CreateRecord
     use RedirectToListPage;
 
     protected static string $resource = DiscountResource::class;
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Buat & buat lagi');
+    }
 }

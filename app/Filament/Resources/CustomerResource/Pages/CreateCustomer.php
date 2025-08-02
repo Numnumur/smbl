@@ -17,6 +17,13 @@ class CreateCustomer extends CreateRecord
 
     protected static string $resource = CustomerResource::class;
 
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCancelFormAction(),
+        ];
+    }
+
     public function form(Form $form): Form
     {
         return parent::form($form)

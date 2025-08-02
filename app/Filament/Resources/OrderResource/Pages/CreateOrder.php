@@ -12,4 +12,10 @@ class CreateOrder extends CreateRecord
     use RedirectToListPage;
 
     protected static string $resource = OrderResource::class;
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Buat & buat lagi');
+    }
 }

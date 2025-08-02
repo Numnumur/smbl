@@ -12,4 +12,10 @@ class CreateWhatsappBroadcast extends CreateRecord
     use RedirectToListPage;
 
     protected static string $resource = WhatsappBroadcastResource::class;
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Buat & buat lagi');
+    }
 }

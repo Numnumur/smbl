@@ -12,4 +12,10 @@ class CreateExpense extends CreateRecord
     use RedirectToListPage;
 
     protected static string $resource = ExpenseResource::class;
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Buat & buat lagi');
+    }
 }

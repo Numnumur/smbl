@@ -166,15 +166,22 @@ class CustomerResource extends Resource
                         ->extraAttributes([
                             'inputmode' => 'numeric',
                             'pattern' => '[0-9]*',
+                            'x-on:keydown.enter.prevent' => '',
                         ]),
                     Forms\Components\Textarea::make('address')
                         ->label('Alamat')
                         ->columnSpanFull()
-                        ->maxLength(300),
+                        ->maxLength(300)
+                        ->extraAttributes([
+                            'x-on:keydown.enter.prevent' => '',
+                        ]),
                     Forms\Components\Textarea::make('note')
                         ->label('Catatan')
                         ->columnSpanFull()
-                        ->maxLength(300),
+                        ->maxLength(300)
+                        ->extraAttributes([
+                            'x-on:keydown.enter.prevent' => '',
+                        ]),
                 ])->columns()
         ];
     }
@@ -185,7 +192,10 @@ class CustomerResource extends Resource
             Forms\Components\TextInput::make('name')
                 ->label('Nama')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
             Forms\Components\Select::make('roles')
                 ->relationship('roles', 'id')
                 ->default(2)
@@ -195,13 +205,19 @@ class CustomerResource extends Resource
                 ->unique()
                 ->email()
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
             Forms\Components\TextInput::make('password')
                 ->label('Kata Sandi')
                 ->password()
                 ->required()
                 ->revealable()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
         ];
     }
 
