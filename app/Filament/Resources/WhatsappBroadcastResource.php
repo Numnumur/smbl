@@ -34,9 +34,9 @@ class WhatsappBroadcastResource extends Resource
 
     protected static ?string $icon = 'heroicon-o-megaphone';
 
-    protected static ?string $group = '';
+    protected static ?string $group = 'Lainnya';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 42;
 
     public static function form(Form $form): Form
     {
