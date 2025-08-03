@@ -6,6 +6,7 @@ use App\Filament\Resources\ExpenseResource\Pages;
 use App\Filament\Resources\ExpenseResource\RelationManagers;
 use App\Helper\ResourceCustomizing;
 use App\Models\Expense;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
@@ -19,6 +20,7 @@ use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Tables\Enums\ActionsPosition;
 
 class ExpenseResource extends Resource
 {
@@ -89,21 +91,29 @@ class ExpenseResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('needs')
-                    ->label('Keperluan'),
+                    ->label('Keperluan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('detail')
+                    ->label('Detail Tambahan')
+                    ->limit(50)
+                    ->wrap()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
-                    ->money('Rp. '),
+                    ->money('IDR', locale: 'id'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Diubah Pada')
                     ->dateTime()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -113,7 +123,7 @@ class ExpenseResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array

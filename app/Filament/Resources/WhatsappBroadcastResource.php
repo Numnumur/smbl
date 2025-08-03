@@ -22,6 +22,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use App\Models\Customer;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Enums\ActionsPosition;
 use Illuminate\Support\Carbon;
 
 class WhatsappBroadcastResource extends Resource
@@ -64,9 +65,18 @@ class WhatsappBroadcastResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('Nama Siaran')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('message_content')
+                    ->label('Isi Pesan')
+                    ->limit(50)
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('send_date')
+                    ->label('Terkirim Pada')
+                    ->dateTime('j F Y, H:i')
+                    ->placeholder('-'),
                 Tables\Columns\IconColumn::make('whatsapp_notified')
-                    ->label('Notifikasi WA')
+                    ->label('Notifikasi Terkirim')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -74,8 +84,9 @@ class WhatsappBroadcastResource extends Resource
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
                 Tables\Columns\TextColumn::make('recipient_count')
-                    ->label('Jumlah Penerima Pesan')
-                    ->numeric(),
+                    ->label('Jumlah Penerima')
+                    ->numeric()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -187,9 +198,9 @@ class WhatsappBroadcastResource extends Resource
                                 ->send();
                         }
                     }),
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ]);
+                Tables\Actions\DeleteAction::make(),
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -208,25 +219,25 @@ class WhatsappBroadcastResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                InfolistSection::make()
-                    ->schema([
-                        TextEntry::make('title')
-                            ->label('Nama Siaran'),
-                        TextEntry::make('message_content')
-                            ->label('Isi Pesan')
-                            ->prose()
-                            ->alignJustify(),
-                        TextEntry::make('send_date')
-                            ->label('Waktu Pengiriman Pesan')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
-                            ->extraAttributes(['class' => 'text-center']),
-                        TextEntry::make('recipient_count')
-                            ->label('Jumlah Penerima Pesan'),
-                    ])->inlineLabel(),
-            ]);
-    }
+    // public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //             InfolistSection::make()
+    //                 ->schema([
+    //                     TextEntry::make('title')
+    //                         ->label('Nama Siaran'),
+    //                     TextEntry::make('message_content')
+    //                         ->label('Isi Pesan')
+    //                         ->prose()
+    //                         ->alignJustify(),
+    //                     TextEntry::make('send_date')
+    //                         ->label('Waktu Pengiriman Pesan')
+    //                         ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
+    //                         ->extraAttributes(['class' => 'text-center']),
+    //                     TextEntry::make('recipient_count')
+    //                         ->label('Jumlah Penerima Pesan'),
+    //                 ])->inlineLabel(),
+    //         ]);
+    // }
 }

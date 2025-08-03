@@ -23,6 +23,7 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -58,7 +59,7 @@ class PickupDeliveryResource extends Resource
                             ->content(fn($record): string => $record?->customer?->user?->name ?? '-'),
 
                         Placeholder::make('tanggal')
-                            ->label('Tanggal')
+                            ->label('Hari dan Tanggal')
                             ->content(
                                 fn($record): string =>
                                 $record?->date
@@ -67,11 +68,11 @@ class PickupDeliveryResource extends Resource
                             ),
 
                         Placeholder::make('waktu')
-                            ->label('Waktu')
+                            ->label('Pada Jam')
                             ->content(
                                 fn($record): string =>
                                 $record?->time
-                                    ? \Carbon\Carbon::parse($record->time)->format('H:i')
+                                    ? \Carbon\Carbon::parse($record->time)->translatedFormat('H:i')
                                     : '-'
                             ),
 
@@ -116,12 +117,12 @@ class PickupDeliveryResource extends Resource
                     ->label('Pelanggan'),
 
                 Tables\Columns\TextColumn::make('date')
-                    ->label('Tanggal')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
+                    ->label('Hari dan Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('l, j F Y')),
 
                 Tables\Columns\TextColumn::make('time')
-                    ->label('Waktu')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('H:i')),
+                    ->label('Pada Jam')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i')),
 
                 Tables\Columns\TextColumn::make('type')
                     ->label('Jenis Permintaan'),
@@ -144,6 +145,18 @@ class PickupDeliveryResource extends Resource
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified_customer ? 'Terkirim' : 'Belum Terkirim'),
+
+                Tables\Columns\TextColumn::make('customer_note')
+                    ->label('Catatan Pelanggan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('laundry_note')
+                    ->label('Alasan Penolakan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
@@ -282,9 +295,10 @@ class PickupDeliveryResource extends Resource
                                 ->send();
                         }
                     }),
+
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -310,10 +324,16 @@ class PickupDeliveryResource extends Resource
                     ->schema([
                         TextEntry::make('customer.user.name')
                             ->label('Pelanggan'),
-                        TextEntry::make('date_and_time')
-                            ->label('Tanggal dan Waktu'),
+                        TextEntry::make('date')
+                            ->label('Hari dan Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('l , j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('time')
+                            ->label('Pada Jam')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
+                            ->extraAttributes(['class' => 'text-center']),
                         TextEntry::make('type')
-                            ->label('Tipe'),
+                            ->label('Jenis Permintaan'),
                         TextEntry::make('status')
                             ->label('Status')
                             ->badge()

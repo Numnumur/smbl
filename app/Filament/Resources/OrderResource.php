@@ -28,6 +28,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\ActionsPosition;
 
 class OrderResource extends Resource
 {
@@ -335,7 +336,6 @@ class OrderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('customer.user.name')
                     ->label('Pelanggan')
-                    ->numeric()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -347,14 +347,59 @@ class OrderResource extends Resource
                         'Terkendala' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
-                    ->label('Tanggal Pesanan Masuk')
+                    ->label('Tanggal Masuk')
                     ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
+                Tables\Columns\TextColumn::make('exit_date')
+                    ->label('Tanggal Keluar')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i'))
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('order_package')
                     ->label('Paket Pesanan')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Tipe Pesanan'),
+                Tables\Columns\TextColumn::make('price')
+                    ->label('Harga Dasar')
+                    ->money('IDR', locale: 'id'),
+                Tables\Columns\TextColumn::make('discount_name')
+                    ->label('Nama Diskon')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('discount_type')
+                    ->label('Tipe Diskon')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('discount_value')
+                    ->label('Nilai Diskon')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('total_price_before_discount')
+                    ->label('Harga Awal')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('total_price')
                     ->label('Total Harga')
-                    ->money('Rp. '),
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('weight')
+                    ->label('Berat')
+                    ->placeholder('-')
+                    ->suffix(' kg'),
+                Tables\Columns\TextColumn::make('length')
+                    ->label('Panjang')
+                    ->placeholder('-')
+                    ->suffix(' cm'),
+                Tables\Columns\TextColumn::make('width')
+                    ->label('Lebar')
+                    ->placeholder('-')
+                    ->suffix(' cm'),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->label('Jumlah')
+                    ->placeholder('-')
+                    ->suffix(' buah'),
+                Tables\Columns\TextColumn::make('laundry_note')
+                    ->label('Catatan Laundry')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
                 Tables\Columns\IconColumn::make('whatsapp_notified')
                     ->label('Notifikasi WA')
                     ->boolean()
@@ -363,7 +408,6 @@ class OrderResource extends Resource
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
-
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -536,7 +580,7 @@ class OrderResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array

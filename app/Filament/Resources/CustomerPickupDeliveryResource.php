@@ -19,6 +19,7 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -52,11 +53,11 @@ class CustomerPickupDeliveryResource extends Resource
             )
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->label('Tanggal')
-                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y')),
+                    ->label('Hari dan Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('l, j F Y')),
 
                 Tables\Columns\TextColumn::make('time')
-                    ->label('Waktu')
+                    ->label('Pada jam')
                     ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('H:i')),
 
                 Tables\Columns\TextColumn::make('type')
@@ -80,6 +81,18 @@ class CustomerPickupDeliveryResource extends Resource
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
+
+                Tables\Columns\TextColumn::make('customer_note')
+                    ->label('Catatan Pelanggan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('laundry_note')
+                    ->label('Alasan Penolakan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
@@ -210,7 +223,7 @@ class CustomerPickupDeliveryResource extends Resource
                     ->modalHeading('Batalkan Permintaan Antar Jemput')
                     ->modalIcon('heroicon-o-exclamation-triangle')
                     ->visible(fn($record) => $record->status === 'Menunggu Konfirmasi'),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);;
     }
 
 
@@ -234,9 +247,13 @@ class CustomerPickupDeliveryResource extends Resource
             ->schema([
                 InfolistSection::make()
                     ->schema([
-                        TextEntry::make('date_and_time')
-                            ->label('Tanggal dan Waktu')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                        TextEntry::make('date')
+                            ->label('Hari dan Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('l , j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('time')
+                            ->label('Pada Jam')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
                             ->extraAttributes(['class' => 'text-center']),
                         TextEntry::make('type')
                             ->label('Tipe'),
@@ -255,7 +272,7 @@ class CustomerPickupDeliveryResource extends Resource
                             ->alignJustify()
                             ->visible(fn($record) => $record->status === 'Ditolak'),
                         TextEntry::make('customer_note')
-                            ->label('Catatan')
+                            ->label('Catatan Pelanggan')
                             ->prose()
                             ->alignJustify(),
                     ])->inlineLabel(),

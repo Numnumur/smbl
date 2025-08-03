@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Tables\Enums\ActionsPosition;
 
 class CustomerResource extends Resource
 {
@@ -101,16 +103,23 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('customer.whatsapp')
                     ->label('Nomor WhatsApp (WA)')
                     ->searchable()
-                    ->prefix('+'),
+                    ->prefix('+')
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.address')
                     ->label('Alamat')
-                    ->wrap(),
+                    ->wrap()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.note')
                     ->label('Catatan')
-                    ->wrap(),
+                    ->limit(50)
+                    ->wrap()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -128,7 +137,7 @@ class CustomerResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -227,6 +236,18 @@ class CustomerResource extends Resource
     {
         return $infolist
             ->schema([
+                InfolistSection::make()
+                    ->schema([
+                        ImageEntry::make('profile_image')
+                            ->label('Foto Profil')
+                            ->circular()
+                            ->height(200)
+                            ->grow(false)
+                            ->extraAttributes([
+                                'class' => 'flex justify-center'
+                            ]),
+                    ]),
+
                 InfolistSection::make()
                     ->schema([
                         TextEntry::make('name')
