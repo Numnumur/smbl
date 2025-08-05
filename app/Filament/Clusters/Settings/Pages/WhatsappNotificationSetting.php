@@ -30,7 +30,7 @@ class WhatsappNotificationSetting extends Page
     #[Locked]
     public ?WhatsappSettingModel $record = null;
 
-    protected static ?string $title = 'Pengaturan Notifikasi WhatsApp';
+    protected static ?string $title = 'Notifikasi WhatsApp';
 
     protected static string $view = 'filament.clusters.settings.pages.whatsapp-notification-setting';
 

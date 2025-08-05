@@ -98,29 +98,24 @@
             text-align: left;
         }
 
-        /* Column widths for the detail table */
+        /* Column widths for the detail table (4 columns) */
         .main-table col:nth-child(1) {
             width: 8%;
         }
 
         /* No */
         .main-table col:nth-child(2) {
-            width: 32%;
+            width: 35%;
         }
 
         /* Nama Pelanggan */
         .main-table col:nth-child(3) {
-            width: 15%;
-        }
-
-        /* Total Pesanan */
-        .main-table col:nth-child(4) {
-            width: 25%;
+            width: 27%;
         }
 
         /* Nomor WhatsApp */
-        .main-table col:nth-child(5) {
-            width: 20%;
+        .main-table col:nth-child(4) {
+            width: 30%;
         }
 
         /* Alamat */
@@ -179,16 +174,14 @@
         <table class="main-table">
             <colgroup>
                 <col style="width: 8%;">
-                <col style="width: 32%;">
-                <col style="width: 15%;">
-                <col style="width: 25%;">
-                <col style="width: 20%;">
+                <col style="width: 35%;">
+                <col style="width: 27%;">
+                <col style="width: 30%;">
             </colgroup>
             <thead>
                 <tr>
                     <th class="center">No</th>
                     <th class="center">Nama</th>
-                    <th class="center">Total Pesanan</th>
                     <th class="center">Nomor WhatsApp</th>
                     <th class="center">Alamat</th>
                 </tr>
@@ -200,23 +193,21 @@
     <table class="main-table" style="margin-top: 0;">
         <colgroup>
             <col style="width: 8%;">
-            <col style="width: 32%;">
-            <col style="width: 15%;">
-            <col style="width: 25%;">
-            <col style="width: 20%;">
+            <col style="width: 35%;">
+            <col style="width: 27%;">
+            <col style="width: 30%;">
         </colgroup>
         <tbody>
             @forelse($customers as $index => $customer)
                 <tr>
                     <td class="center number-cell">{{ $index + 1 }}</td>
                     <td class="left customer-name">{{ $customer['name'] }}</td>
-                    <td class="center number-cell">{{ number_format($customer['total_orders']) }}</td>
                     <td class="left">{{ $customer['whatsapp'] }}</td>
                     <td class="left">{{ $customer['address'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="center">Tidak ada data pelanggan tetap</td>
+                    <td colspan="4" class="center">Tidak ada data pelanggan tetap</td>
                 </tr>
             @endforelse
         </tbody>
