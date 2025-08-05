@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\PickupDelivery;
 use App\Services\Reports\PickupDeliveryReportService;
 use Carbon\Carbon;
 use Filament\Pages\Page;
@@ -166,6 +167,31 @@ class PickupDeliveryReport extends Page implements HasForms
                 'detail' => $data['detail'],
             ];
         })->values();
+    }
+
+    public function getAllRequestsData()
+    {
+        if (!$this->reportData) {
+            return collect();
+        }
+
+        $startDate = Carbon::parse($this->data['start_date'])->startOfDay();
+        $endDate = Carbon::parse($this->data['end_date'])->endOfDay();
+
+        return PickupDelivery::with('customer.user')
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->orderBy('date', 'desc')
+            ->orderBy('time', 'desc')
+            ->get()
+            ->map(function ($pickup) {
+                return [
+                    'customer_name' => $pickup->customer->user->name ?? 'Tidak diketahui',
+                    'date' => Carbon::parse($pickup->date)->translatedFormat('j M Y'),
+                    'time' => Carbon::parse($pickup->time)->format('H:i'),
+                    'type' => $pickup->type,
+                    'status' => $pickup->status,
+                ];
+            });
     }
 
     public function getTitle(): string

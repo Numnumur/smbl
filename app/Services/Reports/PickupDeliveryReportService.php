@@ -12,7 +12,7 @@ class PickupDeliveryReportService
     public static function generate(Carbon $startDate, Carbon $endDate): Collection
     {
         $pickups = PickupDelivery::with('customer.user')
-            ->whereBetween('date_and_time', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
             ->get();
 
         // Group by customer with detailed breakdown
@@ -63,6 +63,13 @@ class PickupDeliveryReportService
         $pelangganTerpopuler = $data['requests_by_customer']->first();
         $pelangganTerpopulerName = $data['requests_by_customer']->keys()->first();
 
+        // Get all requests for PDF
+        $allRequests = PickupDelivery::with('customer.user')
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->orderBy('date', 'desc')
+            ->orderBy('time', 'desc')
+            ->get();
+
         $html = view('pdf.pickup-delivery-report', [
             'name' => $name,
             'startDate' => $startDate->translatedFormat('j F Y'),
@@ -81,6 +88,7 @@ class PickupDeliveryReportService
             ] : null,
             'requestsByType' => $data['requests_by_type'],
             'requestsByCustomer' => $data['requests_by_customer'],
+            'allRequests' => $allRequests,
         ])->render();
 
         return Browsershot::html($html)->pdf();
