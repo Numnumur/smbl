@@ -38,9 +38,10 @@ class FinancialChart extends ChartWidget
             $labels[] = str_pad($i, 2, '0', STR_PAD_LEFT);
         }
 
-        $orders = Order::selectRaw('DAY(entry_date) as day, SUM(total_price) as total')
-            ->whereBetween('entry_date', [$startOfMonth, $endOfMonth])
-            ->groupBy(DB::raw('DAY(entry_date)'))
+        $orders = Order::selectRaw('DAY(exit_date) as day, SUM(total_price) as total')
+            ->where('status', 'Selesai')
+            ->whereBetween('exit_date', [$startOfMonth, $endOfMonth])
+            ->groupBy(DB::raw('DAY(exit_date)'))
             ->pluck('total', 'day');
 
         foreach ($orders as $day => $total) {

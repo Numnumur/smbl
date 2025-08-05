@@ -23,15 +23,17 @@ class PickupDeliveryObserver
 
         $customer = $delivery->customer;
         $customerName = $customer->user->name;
-        $dateTime = Carbon::parse($delivery->date_and_time)->translatedFormat('l, d F Y H:i');
+        $date = Carbon::parse($delivery->date)->locale('id')->translatedFormat('l, j F Y');
+        $time = Carbon::parse($delivery->time)->format('H:i');
 
         $message = implode("\n", [
             "~~ Sinar Laundry ~~",
             "",
             "*Ada permintaan antar jemput baru* dari pelanggan berikut",
             "Nama                         : {$customerName}",
-            "Tipe Permintaan         : {$delivery->type}",
-            "Tanggal dan Waktu    : {$dateTime}",
+            "Jenis Permintaan         : {$delivery->type}",
+            "Hari dan Tanggal       : {$date}",
+            "Pada Jam                    : {$time}",
             "Catatan Pelanggan     : {$delivery->customer_note}",
             "Alamat                        : {$customer->address}",
             "",
@@ -47,21 +49,22 @@ class PickupDeliveryObserver
     public function updated(PickupDelivery $delivery): void
     {
         if (!in_array($delivery->status, ['Sudah Dikonfirmasi', 'Ditolak'])) return;
-        if ($delivery->whatsapp_notified_customer) return;
 
         $token = WhatsappSetting::first()?->fonnte_token;
 
         $customer = $delivery->customer;
         $customerName = $customer->user->name;
-        $dateTime = Carbon::parse($delivery->date_and_time)->translatedFormat('l, d F Y H:i');
+        $date = Carbon::parse($delivery->date)->locale('id')->translatedFormat('l, j F Y');
+        $time = Carbon::parse($delivery->time)->format('H:i');
 
         $messageHeader = [
             "~~ Sinar Laundry ~~",
             "",
             "*Permintaan Antar Jemput Anda*",
             "Atas Nama                  : {$customerName}",
-            "Tipe Permintaan         : {$delivery->type}",
-            "Tanggal dan Waktu    : {$dateTime}",
+            "Jenis Permintaan         : {$delivery->type}",
+            "Hari dan Tanggal       : {$date}",
+            "Pada Jam                    : {$time}",
             "Catatan Pelanggan     : {$delivery->customer_note}",
             "",
         ];

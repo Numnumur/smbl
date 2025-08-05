@@ -18,6 +18,8 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Group;
 use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\ActionsPosition;
 
 class CustomerOrderResource extends Resource
 {
@@ -46,11 +48,6 @@ class CustomerOrderResource extends Resource
                     ->orderByDesc('entry_date')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('order_package')
-                    ->label('Paket Pesanan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -61,17 +58,54 @@ class CustomerOrderResource extends Resource
                         'Terkendala' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('entry_date')
-                    ->label('Tanggal')
-                    ->formatStateUsing(function ($state) {
-                        if (!$state) return null;
-
-                        $date = \Carbon\Carbon::parse($state)->locale('id');
-                        $formattedDate = $date->translatedFormat('j F Y');
-                        $diffForHumans = $date->diffForHumans(null, false, false, 2);
-
-                        return "$formattedDate ($diffForHumans)";
-                    }),
-
+                    ->label('Tanggal Dipesan')
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i')),
+                Tables\Columns\TextColumn::make('exit_date')
+                    ->label('Tanggal Diambil')
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i'))
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('order_package')
+                    ->label('Paket Pesanan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Tipe Pesanan'),
+                Tables\Columns\TextColumn::make('price')
+                    ->label('Harga Dasar')
+                    ->money('IDR', locale: 'id'),
+                Tables\Columns\TextColumn::make('discount_name')
+                    ->label('Nama Diskon')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('discount_type')
+                    ->label('Tipe Diskon')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('discount_value')
+                    ->label('Nilai Diskon')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('total_price_before_discount')
+                    ->label('Harga Awal')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('Total Harga')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('weight')
+                    ->label('Berat')
+                    ->placeholder('-')
+                    ->suffix(' kg'),
+                Tables\Columns\TextColumn::make('length')
+                    ->label('Panjang')
+                    ->placeholder('-')
+                    ->suffix(' cm'),
+                Tables\Columns\TextColumn::make('width')
+                    ->label('Lebar')
+                    ->placeholder('-')
+                    ->suffix(' cm'),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->label('Jumlah')
+                    ->placeholder('-')
+                    ->suffix(' buah'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -82,16 +116,19 @@ class CustomerOrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Tipe Pesanan')
+                    ->options([
+                        'Kiloan' => 'Kiloan',
+                        'Satuan' => 'Satuan',
+                        'Lembaran' => 'Lembaran',
+                        'Karpet' => 'Karpet',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);;
     }
 
     public static function getRelations(): array
@@ -129,13 +166,13 @@ class CustomerOrderResource extends Resource
                 InfolistSection::make()
                     ->schema([
                         TextEntry::make('entry_date')
-                            ->label('Tanggal Masuk')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
+                            ->label('Tanggal Dipesan')
+                            ->formatStateUsing(fn($state) => Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
 
                         TextEntry::make('exit_date')
-                            ->label('Tanggal Selesai')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y H:i'))
+                            ->label('Tanggal Diambil')
+                            ->formatStateUsing(fn($state) => Carbon::parse($state)->translatedFormat('j F Y H:i'))
                             ->extraAttributes(['class' => 'text-center']),
                     ])
                     ->columns(2),

@@ -23,6 +23,8 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -35,9 +37,11 @@ class PickupDeliveryResource extends Resource
 
     protected static ?string $title = 'Antar Jemput';
 
-    protected static ?string $icon = 'heroicon-o-archive-box';
+    protected static ?string $icon = 'heroicon-o-truck';
 
     protected static ?string $group = '';
+
+    protected static ?int $navigationSort = 2;
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -54,12 +58,26 @@ class PickupDeliveryResource extends Resource
                             ->label('Pelanggan')
                             ->content(fn($record): string => $record?->customer?->user?->name ?? '-'),
 
-                        Placeholder::make('date_and_time')
-                            ->label('Tanggal dan Waktu')
-                            ->content(fn($record): string => $record?->date_and_time ?? '-'),
+                        Placeholder::make('tanggal')
+                            ->label('Hari dan Tanggal')
+                            ->content(
+                                fn($record): string =>
+                                $record?->date
+                                    ? \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, j F Y')
+                                    : '-'
+                            ),
+
+                        Placeholder::make('waktu')
+                            ->label('Pada Jam')
+                            ->content(
+                                fn($record): string =>
+                                $record?->time
+                                    ? \Carbon\Carbon::parse($record->time)->translatedFormat('H:i')
+                                    : '-'
+                            ),
 
                         Placeholder::make('type')
-                            ->label('Tipe')
+                            ->label('Jenis Permintaan')
                             ->content(fn($record): string => $record?->type ?? '-'),
 
                         Select::make('status')
@@ -98,12 +116,16 @@ class PickupDeliveryResource extends Resource
                 Tables\Columns\TextColumn::make('customer.user.name')
                     ->label('Pelanggan'),
 
-                Tables\Columns\TextColumn::make('date_and_time')
-                    ->label('Tanggal dan Waktu')
-                    ->formatStateUsing(fn($state) => $state ? \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i') : '-'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Hari dan Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('l, j F Y')),
+
+                Tables\Columns\TextColumn::make('time')
+                    ->label('Pada Jam')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i')),
 
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe'),
+                    ->label('Jenis Permintaan'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -124,6 +146,18 @@ class PickupDeliveryResource extends Resource
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified_customer ? 'Terkirim' : 'Belum Terkirim'),
 
+                Tables\Columns\TextColumn::make('customer_note')
+                    ->label('Catatan Pelanggan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('laundry_note')
+                    ->label('Alasan Penolakan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -135,7 +169,14 @@ class PickupDeliveryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Jenis Permintaan')
+                    ->options([
+                        'Antar' => 'Antar',
+                        'Jemput' => 'Jemput',
+                        'Antar dan Jemput' => 'Antar dan Jemput',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Action::make('kirimWaCustomer')
@@ -165,15 +206,17 @@ class PickupDeliveryResource extends Resource
                         }
 
                         $customerName = $customer->user->name;
-                        $dateTime = Carbon::parse($record->date_and_time)->translatedFormat('l, d F Y H:i');
+                        $date = Carbon::parse($record->date)->locale('id')->translatedFormat('l, j F Y');
+                        $time = Carbon::parse($record->time)->format('H:i');
 
                         $header = [
                             "~~ Sinar Laundry ~~",
                             "",
                             "*Permintaan Antar Jemput Anda*",
                             "Atas Nama                  : {$customerName}",
-                            "Tipe Permintaan         : {$record->type}",
-                            "Tanggal dan Waktu    : {$dateTime}",
+                            "Jenis Permintaan         : {$record->type}",
+                            "Hari dan Tanggal       : {$date}",
+                            "Pada Jam                    : {$time}",
                             "Catatan Pelanggan     : {$record->customer_note}",
                             "",
                         ];
@@ -252,9 +295,10 @@ class PickupDeliveryResource extends Resource
                                 ->send();
                         }
                     }),
+
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -280,10 +324,16 @@ class PickupDeliveryResource extends Resource
                     ->schema([
                         TextEntry::make('customer.user.name')
                             ->label('Pelanggan'),
-                        TextEntry::make('date_and_time')
-                            ->label('Tanggal dan Waktu'),
+                        TextEntry::make('date')
+                            ->label('Hari dan Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('l , j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('time')
+                            ->label('Pada Jam')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
+                            ->extraAttributes(['class' => 'text-center']),
                         TextEntry::make('type')
-                            ->label('Tipe'),
+                            ->label('Jenis Permintaan'),
                         TextEntry::make('status')
                             ->label('Status')
                             ->badge()

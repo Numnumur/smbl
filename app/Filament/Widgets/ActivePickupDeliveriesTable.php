@@ -26,14 +26,15 @@ class ActivePickupDeliveriesTable extends BaseWidget
         return PickupDelivery::query()
             ->where('customer_id', $customerId)
             ->whereIn('status', ['Menunggu Konfirmasi', 'Sudah Dikonfirmasi'])
-            ->orderByDesc('date_and_time');
+            ->orderByDesc('date')
+            ->orderByDesc('time');
     }
 
     protected function getTableColumns(): array
     {
         return [
             Tables\Columns\TextColumn::make('type')
-                ->label('Tipe'),
+                ->label('Jenis Permintaan'),
 
             Tables\Columns\TextColumn::make('status')
                 ->label('Status')

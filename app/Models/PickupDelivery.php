@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PickupDelivery extends Model
 {
     protected $fillable = [
-        'date_and_time',
+        'date',
+        'time',
         'type',
         'status',
         'customer_note',

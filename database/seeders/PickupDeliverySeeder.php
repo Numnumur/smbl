@@ -16,7 +16,8 @@ class PickupDeliverySeeder extends Seeder
     {
         $pickupDeliveries = [
             [
-                'date_and_time' => '2025-6-1',
+                'date' => '2025-7-1',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -24,7 +25,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-6',
+                'date' => '2025-7-6',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -32,7 +34,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-10',
+                'date' => '2025-7-10',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -40,7 +43,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-14',
+                'date' => '2025-7-14',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -48,7 +52,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-18',
+                'date' => '2025-7-18',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -56,7 +61,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-22',
+                'date' => '2025-7-22',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -64,7 +70,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-6-26',
+                'date' => '2025-7-26',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -72,7 +79,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-7-1',
+                'date' => '2025-8-1',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -80,7 +88,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-7-1',
+                'date' => '2025-8-1',
+                'time' => '00:00:00',
                 'type' => 'Antar',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -88,7 +97,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-7-6',
+                'date' => '2025-8-6',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -96,7 +106,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 3,
             ],
             [
-                'date_and_time' => '2025-7-11',
+                'date' => '2025-8-11',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -105,7 +116,8 @@ class PickupDeliverySeeder extends Seeder
             ],
 
             [
-                'date_and_time' => '2025-7-6',
+                'date' => '2025-8-6',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -113,7 +125,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 5,
             ],
             [
-                'date_and_time' => '2025-7-10',
+                'date' => '2025-8-10',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -121,7 +134,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 5,
             ],
             [
-                'date_and_time' => '2025-6-12',
+                'date' => '2025-7-12',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -129,7 +143,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 4,
             ],
             [
-                'date_and_time' => '2025-6-22',
+                'date' => '2025-7-22',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -137,7 +152,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 4,
             ],
             [
-                'date_and_time' => '2025-6-29',
+                'date' => '2025-7-29',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -145,7 +161,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 4,
             ],
             [
-                'date_and_time' => '2025-7-3',
+                'date' => '2025-8-3',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -153,7 +170,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 4,
             ],
             [
-                'date_and_time' => '2025-7-5',
+                'date' => '2025-8-5',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -161,7 +179,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 4,
             ],
             [
-                'date_and_time' => '2025-6-15',
+                'date' => '2025-7-15',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -169,7 +188,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-6-20',
+                'date' => '2025-7-20',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -177,7 +197,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-6-26',
+                'date' => '2025-7-26',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -185,7 +206,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-7-1',
+                'date' => '2025-8-1',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -193,7 +215,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-7-5',
+                'date' => '2025-8-5',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -201,7 +224,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-7-9',
+                'date' => '2025-8-9',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -209,7 +233,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 12,
             ],
             [
-                'date_and_time' => '2025-6-8',
+                'date' => '2025-7-8',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -217,7 +242,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 17,
             ],
             [
-                'date_and_time' => '2025-6-16',
+                'date' => '2025-7-16',
+                'time' => '00:00:00',
                 'type' => 'Antar',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -225,7 +251,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 17,
             ],
             [
-                'date_and_time' => '2025-6-20',
+                'date' => '2025-7-20',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -233,7 +260,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 17,
             ],
             [
-                'date_and_time' => '2025-6-24',
+                'date' => '2025-7-24',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -241,7 +269,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 17,
             ],
             [
-                'date_and_time' => '2025-6-29',
+                'date' => '2025-7-29',
+                'time' => '00:00:00',
                 'type' => 'Antar dan Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,
@@ -249,7 +278,8 @@ class PickupDeliverySeeder extends Seeder
                 'customer_id' => 17,
             ],
             [
-                'date_and_time' => '2025-7-7',
+                'date' => '2025-8-7',
+                'time' => '00:00:00',
                 'type' => 'Jemput',
                 'status' => 'Selesai',
                 'customer_note' => null,

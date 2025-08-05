@@ -141,6 +141,14 @@ class PermissionSeeder extends Seeder
             ['name' => 'delete_any_whatsapp::broadcast', 'guard_name' => 'web'],
             ['name' => 'force_delete_whatsapp::broadcast', 'guard_name' => 'web'],
             ['name' => 'force_delete_any_whatsapp::broadcast', 'guard_name' => 'web'],
+            ['name' => 'page_CustomerOrderEntryExitReport', 'guard_name' => 'web'],
+            ['name' => 'page_FinanceIncomeReport', 'guard_name' => 'web'],
+            ['name' => 'page_OrderWorkReport', 'guard_name' => 'web'],
+            ['name' => 'page_CustomerReport', 'guard_name' => 'web'],
+            ['name' => 'page_DiscountReport', 'guard_name' => 'web'],
+            ['name' => 'page_PickupDeliveryReport', 'guard_name' => 'web'],
+            ['name' => 'page_FinanceExpenseReport', 'guard_name' => 'web'],
+            ['name' => 'page_RegularCustomerReport', 'guard_name' => 'web'],
         ];
 
         foreach ($permissions as $permission) {

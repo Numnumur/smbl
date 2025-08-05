@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Filters\SelectFilter;
 
 class OrderPackageResource extends Resource
 {
@@ -29,6 +31,8 @@ class OrderPackageResource extends Resource
     protected static ?string $icon = 'heroicon-o-archive-box';
 
     protected static ?string $group = 'Manajemen Data';
+
+    protected static ?int $navigationSort = 23;
 
     public static function form(Form $form): Form
     {
@@ -94,13 +98,20 @@ class OrderPackageResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Tipe')
+                    ->options([
+                        'Kiloan' => 'Kiloan',
+                        'Satuan' => 'Satuan',
+                        'Lembaran' => 'Lembaran',
+                        'Karpet' => 'Karpet',
+                    ])
+                    ->native(false),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -119,21 +130,21 @@ class OrderPackageResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                InfolistSection::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Nama'),
-                        TextEntry::make('type')
-                            ->label('Tipe'),
-                        TextEntry::make('price')
-                            ->label('Tarif')
-                            ->prefix('Rp. ')
-                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
-                    ])->inlineLabel(),
-            ]);
-    }
+    // public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //             InfolistSection::make()
+    //                 ->schema([
+    //                     TextEntry::make('name')
+    //                         ->label('Nama'),
+    //                     TextEntry::make('type')
+    //                         ->label('Tipe'),
+    //                     TextEntry::make('price')
+    //                         ->label('Tarif')
+    //                         ->prefix('Rp. ')
+    //                         ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+    //                 ])->inlineLabel(),
+    //         ]);
+    // }
 }

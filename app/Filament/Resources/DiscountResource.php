@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Tables\Enums\ActionsPosition;
+use Illuminate\Support\Carbon;
 
 class DiscountResource extends Resource
 {
@@ -30,6 +32,8 @@ class DiscountResource extends Resource
     protected static ?string $icon = 'heroicon-o-receipt-percent';
 
     protected static ?string $group = 'Manajemen Data';
+
+    protected static ?int $navigationSort = 22;
 
     public static function form(Form $form): Form
     {
@@ -76,6 +80,7 @@ class DiscountResource extends Resource
                                     ->disabled(function ($get) {
                                         return $get('type') === null;
                                     })
+                                    ->minDate(Carbon::today())
                                     ->reactive()
                                     ->rules(['after_or_equal:today'])
                                     ->validationMessages([
@@ -86,8 +91,10 @@ class DiscountResource extends Resource
                                     ->native(false)
                                     ->required()
                                     ->afterOrEqual('start_date')
-                                    ->disabled(fn($get) => $get('type') === null)
+                                    ->minDate(fn(callable $get) => $get('start_date'))
                                     ->reactive()
+                                    ->disabled(fn($get) => $get('type') === null)
+                                    ->helperText('Tidak bisa lebih kecil dari tanggal awal')
                                     ->rules(['after_or_equal:start_date'])
                                     ->validationMessages([
                                         'after_or_equal' => 'Tanggal hingga tidak boleh lebih awal dari tanggal mulai.',
@@ -121,6 +128,12 @@ class DiscountResource extends Resource
 
                         return $state;
                     }),
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Tanggal Mulai')
+                    ->date('j F Y'),
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('Tanggal Selesai')
+                    ->date('j F Y'),
                 Tables\Columns\TextColumn::make('orderPackage.name')
                     ->label('Paket Pesanan'),
                 Tables\Columns\TextColumn::make('created_at')
@@ -137,10 +150,9 @@ class DiscountResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -159,32 +171,32 @@ class DiscountResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                InfolistSection::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Nama'),
-                        TextEntry::make('type')
-                            ->label('Tipe'),
-                        TextEntry::make('value')
-                            ->label('Nilai')
-                            ->prefix(fn($record) => $record->type === 'Langsung' ? 'Rp. ' : null)
-                            ->suffix(fn($record) => $record->type === 'Persentase' ? ' %' : null)
-                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
-                        TextEntry::make('start_date')
-                            ->label('Dari Tanggal')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
-                            ->extraAttributes(['class' => 'text-center']),
-                        TextEntry::make('end_date')
-                            ->label('Sampai')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
-                            ->extraAttributes(['class' => 'text-center']),
-                        TextEntry::make('orderPackage.name')
-                            ->label('Paket Pesanan'),
-                    ])->inlineLabel(),
-            ]);
-    }
+    // public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //             InfolistSection::make()
+    //                 ->schema([
+    //                     TextEntry::make('name')
+    //                         ->label('Nama'),
+    //                     TextEntry::make('type')
+    //                         ->label('Tipe'),
+    //                     TextEntry::make('value')
+    //                         ->label('Nilai')
+    //                         ->prefix(fn($record) => $record->type === 'Langsung' ? 'Rp. ' : null)
+    //                         ->suffix(fn($record) => $record->type === 'Persentase' ? ' %' : null)
+    //                         ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')),
+    //                     TextEntry::make('start_date')
+    //                         ->label('Dari Tanggal')
+    //                         ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
+    //                         ->extraAttributes(['class' => 'text-center']),
+    //                     TextEntry::make('end_date')
+    //                         ->label('Sampai')
+    //                         ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('j F Y'))
+    //                         ->extraAttributes(['class' => 'text-center']),
+    //                     TextEntry::make('orderPackage.name')
+    //                         ->label('Paket Pesanan'),
+    //                 ])->inlineLabel(),
+    //         ]);
+    // }
 }

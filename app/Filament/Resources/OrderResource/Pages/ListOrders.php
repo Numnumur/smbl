@@ -23,17 +23,10 @@ class ListOrders extends ListRecords
     {
         return [
             'Belum Selesai' => Tab::make()
-                ->modifyQueryUsing(
-                    fn($query) => $query->where('status', '!=', 'Selesai')
-                ),
+                ->modifyQueryUsing(fn($query) => $query->where('status', '!=', 'Selesai')),
 
             'Selesai' => Tab::make()
-                ->modifyQueryUsing(
-                    fn($query) =>
-                    $query->where(
-                        fn($query) => $query->where('status', 'Selesai')
-                    )
-                ),
+                ->modifyQueryUsing(fn($query) => $query->where('status', 'Selesai')),
         ];
     }
 }

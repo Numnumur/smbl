@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Tables\Enums\ActionsPosition;
 
 class CustomerResource extends Resource
 {
@@ -31,6 +33,8 @@ class CustomerResource extends Resource
     protected static ?string $icon = 'heroicon-o-users';
 
     protected static ?string $group = 'Manajemen Data';
+
+    protected static ?int $navigationSort = 21;
 
     public static function form(Form $form): Form
     {
@@ -99,16 +103,23 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('customer.whatsapp')
                     ->label('Nomor WhatsApp (WA)')
                     ->searchable()
-                    ->prefix('+'),
+                    ->prefix('+')
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.address')
                     ->label('Alamat')
-                    ->wrap(),
+                    ->wrap()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.note')
                     ->label('Catatan')
-                    ->wrap(),
+                    ->limit(50)
+                    ->wrap()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('customer.created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -126,7 +137,7 @@ class CustomerResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);
     }
 
     public static function getRelations(): array
@@ -166,15 +177,22 @@ class CustomerResource extends Resource
                         ->extraAttributes([
                             'inputmode' => 'numeric',
                             'pattern' => '[0-9]*',
+                            'x-on:keydown.enter.prevent' => '',
                         ]),
                     Forms\Components\Textarea::make('address')
                         ->label('Alamat')
                         ->columnSpanFull()
-                        ->maxLength(300),
+                        ->maxLength(300)
+                        ->extraAttributes([
+                            'x-on:keydown.enter.prevent' => '',
+                        ]),
                     Forms\Components\Textarea::make('note')
                         ->label('Catatan')
                         ->columnSpanFull()
-                        ->maxLength(300),
+                        ->maxLength(300)
+                        ->extraAttributes([
+                            'x-on:keydown.enter.prevent' => '',
+                        ]),
                 ])->columns()
         ];
     }
@@ -185,7 +203,10 @@ class CustomerResource extends Resource
             Forms\Components\TextInput::make('name')
                 ->label('Nama')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
             Forms\Components\Select::make('roles')
                 ->relationship('roles', 'id')
                 ->default(2)
@@ -195,13 +216,19 @@ class CustomerResource extends Resource
                 ->unique()
                 ->email()
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
             Forms\Components\TextInput::make('password')
                 ->label('Kata Sandi')
                 ->password()
                 ->required()
                 ->revealable()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->extraAttributes([
+                    'x-on:keydown.enter.prevent' => '',
+                ]),
         ];
     }
 
@@ -209,6 +236,18 @@ class CustomerResource extends Resource
     {
         return $infolist
             ->schema([
+                InfolistSection::make()
+                    ->schema([
+                        ImageEntry::make('profile_image')
+                            ->label('Foto Profil')
+                            ->circular()
+                            ->height(200)
+                            ->grow(false)
+                            ->extraAttributes([
+                                'class' => 'flex justify-center'
+                            ]),
+                    ]),
+
                 InfolistSection::make()
                     ->schema([
                         TextEntry::make('name')

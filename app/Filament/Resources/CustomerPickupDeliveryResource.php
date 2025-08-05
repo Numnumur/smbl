@@ -19,6 +19,8 @@ use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use App\Models\WhatsappSetting;
+use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +33,7 @@ class CustomerPickupDeliveryResource extends Resource
 
     protected static ?string $title = 'Riwayat Antar Jemput';
 
-    protected static ?string $icon = 'heroicon-o-archive-box';
+    protected static ?string $icon = 'heroicon-o-truck';
 
     protected static ?string $group = '';
 
@@ -50,12 +52,16 @@ class CustomerPickupDeliveryResource extends Resource
                     ->orderByDesc('created_at')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('date_and_time')
-                    ->label('Tanggal dan Waktu')
-                    ->formatStateUsing(fn($state) => $state ? \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('j F Y H:i') : '-'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Hari dan Tanggal')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->locale('id')->translatedFormat('l, j F Y')),
+
+                Tables\Columns\TextColumn::make('time')
+                    ->label('Pada jam')
+                    ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('H:i')),
 
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe'),
+                    ->label('Jenis Permintaan'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -76,6 +82,18 @@ class CustomerPickupDeliveryResource extends Resource
                     ->falseColor('gray')
                     ->tooltip(fn($record) => $record->whatsapp_notified ? 'Terkirim' : 'Belum Terkirim'),
 
+                Tables\Columns\TextColumn::make('customer_note')
+                    ->label('Catatan Pelanggan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('laundry_note')
+                    ->label('Alasan Penolakan')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()
@@ -87,7 +105,14 @@ class CustomerPickupDeliveryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Jenis Permintaan')
+                    ->options([
+                        'Antar' => 'Antar',
+                        'Jemput' => 'Jemput',
+                        'Antar dan Jemput' => 'Antar dan Jemput',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Action::make('kirimWaAdmin')
@@ -117,20 +142,23 @@ class CustomerPickupDeliveryResource extends Resource
 
                         $customer = $record->customer;
                         $customerName = $customer->user->name;
-                        $dateTime = Carbon::parse($record->date_and_time)->translatedFormat('l, d F Y H:i');
+                        $date = Carbon::parse($record->date)->locale('id')->translatedFormat('l, j F Y');
+                        $time = Carbon::parse($record->time)->format('H:i');
 
                         $message = implode("\n", [
                             "~~ Sinar Laundry ~~",
                             "",
                             "*Ada permintaan antar jemput baru* dari pelanggan berikut",
                             "Nama                         : {$customerName}",
-                            "Tipe Permintaan         : {$record->type}",
-                            "Tanggal dan Waktu    : {$dateTime}",
+                            "Jenis Permintaan         : {$record->type}",
+                            "Hari dan Tanggal       : {$date}",
+                            "Pada Jam                    : {$time}",
                             "Catatan Pelanggan     : {$record->customer_note}",
                             "Alamat                        : {$customer->address}",
                             "",
                             "Silahkan lakukan konfirmasi lewat web."
                         ]);
+
 
                         try {
                             $curl = curl_init();
@@ -195,7 +223,7 @@ class CustomerPickupDeliveryResource extends Resource
                     ->modalHeading('Batalkan Permintaan Antar Jemput')
                     ->modalIcon('heroicon-o-exclamation-triangle')
                     ->visible(fn($record) => $record->status === 'Menunggu Konfirmasi'),
-            ]);
+            ], position: ActionsPosition::BeforeColumns);;
     }
 
 
@@ -219,9 +247,13 @@ class CustomerPickupDeliveryResource extends Resource
             ->schema([
                 InfolistSection::make()
                     ->schema([
-                        TextEntry::make('date_and_time')
-                            ->label('Tanggal dan Waktu')
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('d-m-Y H:i'))
+                        TextEntry::make('date')
+                            ->label('Hari dan Tanggal')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('l , j F Y'))
+                            ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('time')
+                            ->label('Pada Jam')
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
                             ->extraAttributes(['class' => 'text-center']),
                         TextEntry::make('type')
                             ->label('Tipe'),
@@ -240,7 +272,7 @@ class CustomerPickupDeliveryResource extends Resource
                             ->alignJustify()
                             ->visible(fn($record) => $record->status === 'Ditolak'),
                         TextEntry::make('customer_note')
-                            ->label('Catatan')
+                            ->label('Catatan Pelanggan')
                             ->prose()
                             ->alignJustify(),
                     ])->inlineLabel(),
