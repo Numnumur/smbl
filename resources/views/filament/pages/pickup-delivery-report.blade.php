@@ -59,7 +59,7 @@
                     </div>
 
                     <div class="space-y-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pelanggan Terpopuler</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Permintaan Terbanyak</dt>
                         <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $summary['pelangganTerpopuler'] }}</dd>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 @if ($type['type'] === 'Antar') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
                                                 @elseif($type['type'] === 'Jemput') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                @elseif($type['type'] === 'Antar Jemput') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                                @elseif($type['type'] === 'Antar dan Jemput') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
                                                 @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
                                                 {{ $type['type'] }}
                                             </span>
@@ -186,7 +186,7 @@
                                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
                                                             @if ($type === 'Antar') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
                                                             @elseif($type === 'Jemput') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                            @elseif($type === 'Antar Jemput') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                                            @elseif($type === 'Antar dan Jemput') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
                                                             @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
                                                             {{ $type }}
                                                         </span>

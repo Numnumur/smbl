@@ -76,10 +76,6 @@
                                         Nama
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
-                                        Total Pesanan
-                                    </th>
-                                    <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
                                         Nomor WhatsApp
                                     </th>
@@ -99,10 +95,6 @@
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             {{ $data['name'] }}
                                         </td>
-                                        <td
-                                            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
-                                            {{ number_format($data['total_orders']) }}
-                                        </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             {{ $data['whatsapp'] }}
                                         </td>
@@ -112,7 +104,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5"
+                                        <td colspan="4"
                                             class="px-6 py-8 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
                                             <div class="flex flex-col items-center">
                                                 <x-heroicon-o-inbox class="w-8 h-8 mb-2" />

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Permintaan Antar Jemput</title>
+    <title>{{ $name }}</title>
     <style>
         @page {
             margin: 40px;
@@ -131,6 +131,16 @@
             break-inside: avoid-page;
             page-break-inside: avoid;
         }
+
+        .detail-table {
+            margin-top: 30px;
+            page-break-inside: auto;
+        }
+
+        /* Allow detail table to break if too long */
+        .detail-table tbody tr {
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 
@@ -171,7 +181,7 @@
             </td>
         </tr>
         <tr>
-            <td><strong>Pelanggan Terpopuler</strong></td>
+            <td><strong>Permintaan Terbanyak</strong></td>
             <td>:</td>
             <td>
                 @if ($pelangganTerpopuler)
@@ -234,7 +244,6 @@
             </tbody>
         </table>
     </div>
-
 </body>
 
 </html>
