@@ -136,7 +136,8 @@ class Register extends SimplePage
                     ),
                 Textarea::make('address')
                     ->label('Alamat')
-                    ->maxLength(300),
+                    ->maxLength(300)
+                    ->helperText('Anda masih bisa mengaturnya di menu Pengaturan setelah melakukan pendaftaran'),
             ])
             ->statePath('data');
     }
