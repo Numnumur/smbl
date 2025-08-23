@@ -48,7 +48,12 @@ class PickupDeliveryObserver
 
     public function updated(PickupDelivery $delivery): void
     {
-        if (!in_array($delivery->status, ['Sudah Dikonfirmasi', 'Ditolak'])) return;
+        if (
+            !$delivery->isDirty('status') ||
+            !in_array($delivery->status, ['Sudah Dikonfirmasi', 'Ditolak'])
+        ) {
+            return;
+        }
 
         $token = WhatsappSetting::first()?->fonnte_token;
 
