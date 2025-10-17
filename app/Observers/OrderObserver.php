@@ -13,7 +13,7 @@ class OrderObserver
     {
         if (
             !$order->isDirty('status') ||
-            !in_array($order->status, ['Selesai', 'Terkendala'])
+            !in_array($order->status, ['Selesai Diproses', 'Terkendala'])
         ) {
             return;
         }

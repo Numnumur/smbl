@@ -436,7 +436,7 @@ class OrderResource extends Resource
                     ->color('success')
                     ->visible(
                         fn($record) =>
-                        in_array($record->status, ['Selesai', 'Terkendala']) &&
+                        in_array($record->status, ['Selesai Diproses', 'Terkendala']) &&
                             !$record->whatsapp_notified
                     )
                     ->requiresConfirmation()

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{{ $name }}</title>
+    <title>Laporan Permintaan Antar Jemput</title>
     <style>
         @page {
             margin: 40px;
