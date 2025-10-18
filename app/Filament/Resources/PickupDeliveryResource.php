@@ -76,6 +76,14 @@ class PickupDeliveryResource extends Resource
                                     : '-'
                             ),
 
+                        Textarea::make('estimation_note')
+                            ->label('Catatan Estimasi')
+                            ->columnSpanFull()
+                            ->maxLength(300)
+                            ->visible(fn(Forms\Get $get) => in_array($get('status'), ['Sudah Dikonfirmasi', 'Selesai']))
+                            ->disabled(fn(Forms\Get $get) => $get('status') === 'Selesai')
+                            ->required(fn(Forms\Get $get) => $get('status') === 'Sudah Dikonfirmasi'),
+
                         Placeholder::make('type')
                             ->label('Jenis Permintaan')
                             ->content(fn($record): string => $record?->type ?? '-'),
@@ -123,6 +131,12 @@ class PickupDeliveryResource extends Resource
                 Tables\Columns\TextColumn::make('time')
                     ->label('Pada Jam')
                     ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i')),
+
+                Tables\Columns\TextColumn::make('estimation_note')
+                    ->label('Catatan Estimasi')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('type')
                     ->label('Jenis Permintaan'),
@@ -224,6 +238,9 @@ class PickupDeliveryResource extends Resource
                         if ($record->status === 'Sudah Dikonfirmasi') {
                             $body = [
                                 "✅ *Sudah dikonfirmasi oleh admin* dan akan dilakukan sesuai dengan waktu yang anda tentukan.",
+                                "",
+                                "Catatan Estimasi:",
+                                $record->estimation_note,
                             ];
                         } elseif ($record->status === 'Ditolak') {
                             $body = [
@@ -332,6 +349,11 @@ class PickupDeliveryResource extends Resource
                             ->label('Pada Jam')
                             ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
                             ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('estimation_note')
+                            ->label('Catatan Estimasi')
+                            ->prose()
+                            ->alignJustify()
+                            ->visible(fn($record) => in_array($record->status, ['Sudah Dikonfirmasi', 'Selesai'])),
                         TextEntry::make('type')
                             ->label('Jenis Permintaan'),
                         TextEntry::make('status')
