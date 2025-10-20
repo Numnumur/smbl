@@ -149,6 +149,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'page_PickupDeliveryReport', 'guard_name' => 'web'],
             ['name' => 'page_FinanceExpenseReport', 'guard_name' => 'web'],
             ['name' => 'page_RegularCustomerReport', 'guard_name' => 'web'],
+            ['name' => 'widget_CustomerStatsOverview2', 'guard_name' => 'web'],
         ];
 
         foreach ($permissions as $permission) {
