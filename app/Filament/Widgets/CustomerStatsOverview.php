@@ -7,7 +7,6 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Illuminate\Support\Carbon;
 use App\Models\Order;
-use App\Models\PickupDelivery;
 use Filament\Support\Enums\IconPosition;
 
 class CustomerStatsOverview extends BaseWidget
@@ -20,7 +19,7 @@ class CustomerStatsOverview extends BaseWidget
 
     protected function getHeading(): ?string
     {
-        return 'Informasi Pelanggan';
+        return 'Informasi Pesanan Pelanggan';
     }
 
     protected function getStats(): array
@@ -31,38 +30,34 @@ class CustomerStatsOverview extends BaseWidget
             return [];
         }
 
-        $orders = $customer->orders();
-        $pickupDeliveries = $customer->pickupDeliveries();
+        $now = Carbon::now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $endOfMonth = $now->copy()->endOfMonth();
 
-        $lastOrder = $orders->latest('entry_date')->first();
+        $orders = $customer->orders()->where('status', 'Selesai');
+
+        $lastOrder = $orders->latest('exit_date')->first();
         $lastOrderPackage = $lastOrder?->order_package ?? '-';
         $lastOrderDaysAgo = $lastOrder
-            ? Carbon::parse($lastOrder->entry_date)->diffForHumans(null, true) . ' lalu'
+            ? Carbon::parse($lastOrder->exit_date)->diffForHumans(null, true) . ' lalu'
             : 'Tidak ada data';
 
         $thisMonthOrderCount = $orders
-            ->whereMonth('entry_date', now()->month)
-            ->whereYear('entry_date', now()->year)
+            ->whereBetween('exit_date', [$startOfMonth, $endOfMonth])
             ->count();
 
-        $lastPickup = $pickupDeliveries
-            ->where('status', '!=', 'Ditolak')
-            ->orderByDesc('date')
-            ->orderByDesc('time')
-            ->first();
+        $ordersThisMonth = Order::where('status', 'Selesai')
+            ->whereBetween('exit_date', [$startOfMonth, $endOfMonth])
+            ->get();
 
-        $lastPickupType = $lastPickup
-            ? 'Permintaan ' . ucfirst($lastPickup->type)
-            : 'Tidak ada data';
+        $popularPackageData = $ordersThisMonth
+            ->groupBy('order_package')
+            ->map(fn($orders) => $orders->count())
+            ->sortDesc()
+            ->take(1);
 
-        $lastPickupDaysAgo = $lastPickup
-            ? \Carbon\Carbon::parse("{$lastPickup->date} {$lastPickup->time}")->diffForHumans(null, true) . ' lalu'
-            : 'Tidak ada data';
-
-        $thisMonthPickupCount = $pickupDeliveries
-            ->whereMonth('date', now()->month)
-            ->whereYear('date', now()->year)
-            ->count();
+        $popularPackageName = $popularPackageData->keys()->first() ?? '-';
+        $popularPackageCount = $popularPackageData->values()->first() ?? 0;
 
         return [
             Stat::make('pesanan_terakhir', $lastOrderPackage)
@@ -77,17 +72,11 @@ class CustomerStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-o-shopping-bag', IconPosition::Before)
                 ->color('violet'),
 
-            Stat::make('antar_jemput_terakhir', $lastPickupType)
-                ->label('Permintaan Antar Jemput Terakhir')
-                ->description($lastPickupDaysAgo)
-                ->descriptionIcon('heroicon-o-archive-box', IconPosition::Before)
+            Stat::make('pesanan_populer', $popularPackageName)
+                ->label('Paket Pesanan Populer')
+                ->description("Jumlah dipesan: {$popularPackageCount} pesanan")
+                ->descriptionIcon('heroicon-o-fire', IconPosition::Before)
                 ->color('success'),
-
-            Stat::make('antar_jemput_bulan_ini', $thisMonthPickupCount)
-                ->label('Antar Jemput Bulan Ini')
-                ->description('Total Permintaan')
-                ->descriptionIcon('heroicon-o-archive-box', IconPosition::Before)
-                ->color('info'),
         ];
     }
 }

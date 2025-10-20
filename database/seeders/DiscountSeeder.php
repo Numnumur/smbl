@@ -14,8 +14,8 @@ class DiscountSeeder extends Seeder
     public function run(): void
     {
         $discounts = [
-            ['name' => 'Diskon Agustus 2025 Reguler Cuci Setrika 3 hari', 'type' => 'Langsung', 'value' => 2000, 'start_date' => '2025-08-01', 'end_date' => '2025-08-31', 'order_package_id' => 1],
-            ['name' => 'Diskon Agustus 2025 Reguler Cuci Setrika 2 hari', 'type' => 'Persentase', 'value' => 2, 'start_date' => '2025-08-01', 'end_date' => '2025-08-31', 'order_package_id' => 2],
+            ['name' => 'Diskon Oktober 2025 Reguler Cuci Setrika 3 hari', 'type' => 'Langsung', 'value' => 2000, 'start_date' => '2025-10-01', 'end_date' => '2025-10-31', 'order_package_id' => 1],
+            ['name' => 'Diskon Oktober 2025 Reguler Cuci Setrika 2 hari', 'type' => 'Persentase', 'value' => 2, 'start_date' => '2025-10-01', 'end_date' => '2025-10-31', 'order_package_id' => 2],
         ];
 
         foreach ($discounts as $d) {

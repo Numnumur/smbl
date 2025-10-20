@@ -10,6 +10,7 @@ class PickupDelivery extends Model
     protected $fillable = [
         'date',
         'time',
+        'estimation_note',
         'type',
         'status',
         'customer_note',

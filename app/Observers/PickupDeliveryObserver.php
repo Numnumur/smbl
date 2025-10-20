@@ -76,7 +76,10 @@ class PickupDeliveryObserver
 
         if ($delivery->status === 'Sudah Dikonfirmasi') {
             $message = array_merge($messageHeader, [
-                "✅ *Sudah dikonfirmasi oleh admin* dan akan dilakukan sesuai dengan waktu yang anda tentukan."
+                "✅ *Sudah dikonfirmasi oleh admin* dan akan dilakukan sesuai dengan waktu yang anda tentukan.",
+                "",
+                "Catatan Estimasi:",
+                $delivery->estimation_note,
             ]);
         } elseif ($delivery->status === 'Ditolak') {
             $message = array_merge($messageHeader, [

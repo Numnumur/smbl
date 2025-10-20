@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->time('time');
+            $table->text('estimation_note')->nullable();
             $table->enum('type', ['Antar', 'Jemput', 'Antar dan Jemput']);
             $table->enum('status', ['Menunggu Konfirmasi', 'Sudah Dikonfirmasi', 'Selesai', 'Ditolak']);
             $table->text('customer_note')->nullable();

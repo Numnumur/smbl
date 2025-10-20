@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Get;
 
 class Dashboard extends BaseDashboard
 {
@@ -84,13 +85,34 @@ class Dashboard extends BaseDashboard
                                         ->validationMessages([
                                             'after_or_equal' => 'Tanggal harus hari ini atau setelahnya.',
                                         ])
-                                        ->native(false),
+                                        ->native(false)
+                                        ->live(),
 
                                     TimePicker::make('time')
                                         ->label('Waktu')
                                         ->required()
                                         ->seconds(false)
-                                        ->native(false),
+                                        ->native(false)
+                                        ->rules([
+                                            function (Get $get) {
+                                                return function (string $attribute, $value, $fail) use ($get) {
+                                                    $selectedDate = $get('date');
+
+                                                    if (!$selectedDate || !$value) {
+                                                        return;
+                                                    }
+
+                                                    $dateOnly = Carbon::parse($selectedDate)->format('Y-m-d');
+                                                    $timeOnly = Carbon::parse($value)->format('H:i:s');
+                                                    $selectedDateTime = Carbon::parse($dateOnly . ' ' . $timeOnly);
+                                                    $minimumDateTime = now()->addHour();
+
+                                                    if ($selectedDateTime->lt($minimumDateTime)) {
+                                                        $fail('Waktu paling cepat adalah 1 jam dari sekarang (' . $minimumDateTime->format('H:i') . ').');
+                                                    }
+                                                };
+                                            }
+                                        ]),
                                 ])->columns();
 
                             $formComponents[] = Section::make()

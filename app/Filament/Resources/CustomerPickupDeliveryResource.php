@@ -60,6 +60,12 @@ class CustomerPickupDeliveryResource extends Resource
                     ->label('Pada jam')
                     ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->format('H:i')),
 
+                Tables\Columns\TextColumn::make('estimation_note')
+                    ->label('Catatan Estimasi')
+                    ->placeholder('-')
+                    ->limit(50)
+                    ->wrap(),
+
                 Tables\Columns\TextColumn::make('type')
                     ->label('Jenis Permintaan'),
 
@@ -255,6 +261,11 @@ class CustomerPickupDeliveryResource extends Resource
                             ->label('Pada Jam')
                             ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('H:i'))
                             ->extraAttributes(['class' => 'text-center']),
+                        TextEntry::make('estimation_note')
+                            ->label('Catatan Estimasi')
+                            ->prose()
+                            ->alignJustify()
+                            ->visible(fn($record) => in_array($record->status, ['Sudah Dikonfirmasi', 'Selesai'])),
                         TextEntry::make('type')
                             ->label('Tipe'),
                         TextEntry::make('status')
