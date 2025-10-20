@@ -30,10 +30,14 @@ class CustomerStatsOverview2 extends BaseWidget
             return [];
         }
 
-        $pickupDeliveries = $customer->pickupDeliveries();
+        $now = Carbon::now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $endOfMonth = $now->copy()->endOfMonth();
+
+        $pickupDeliveries = $customer->pickupDeliveries()
+            ->whereIn('status', ['Sudah Dikonfirmasi', 'Selesai']);
 
         $lastPickup = $pickupDeliveries
-            ->where('status', '!=', 'Ditolak')
             ->orderByDesc('date')
             ->orderByDesc('time')
             ->first();
@@ -47,15 +51,14 @@ class CustomerStatsOverview2 extends BaseWidget
             : 'Tidak ada data';
 
         $thisMonthPickupCount = $pickupDeliveries
-            ->whereMonth('date', now()->month)
-            ->whereYear('date', now()->year)
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->count();
 
-        $now = Carbon::now();
-        $popularPickupData = PickupDelivery::whereMonth('date', $now->month)
-            ->whereYear('date', $now->year)
-            ->where('status', '!=', 'Ditolak')
-            ->get()
+        $pickupDeliveriesThisMonth = PickupDelivery::whereIn('status', ['Sudah Dikonfirmasi', 'Selesai'])
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->get();
+
+        $popularPickupData = $pickupDeliveriesThisMonth
             ->groupBy('type')
             ->map(fn($pickups) => $pickups->count())
             ->sortDesc()
